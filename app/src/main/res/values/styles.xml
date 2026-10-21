@@ -14,7 +14,7 @@
 
     <!-- The "pill" behind the selected icon in the bottom bar -->
     <style name="AppActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
-        <item name="android:color">@color/green_pale</item>
+        <item name="android:color">@color/lavender_pale</item>
     </style>
 
 </resources>

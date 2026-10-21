@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "My Application1"
+rootProject.name = "Rewinder"
 include(":app")

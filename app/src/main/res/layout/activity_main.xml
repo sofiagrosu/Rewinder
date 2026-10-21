@@ -33,7 +33,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/greeting"
-                android:textColor="@color/text_dark"
+                android:textColor="@color/text_primary"
                 android:textSize="32sp"
                 android:textStyle="bold" />
 
@@ -42,7 +42,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:textColor="@color/text_gray"
+                android:textColor="@color/text_secondary"
                 android:textSize="16sp"
                 tools:text="You've answered 14 questions today" />
 
@@ -67,7 +67,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="@string/daily_goal"
-                            android:textColor="@color/text_dark"
+                            android:textColor="@color/text_primary"
                             android:textSize="17sp"
                             android:textStyle="bold" />
 
@@ -75,7 +75,7 @@
                             android:id="@+id/txtGoal"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/text_dark"
+                            android:textColor="@color/text_primary"
                             android:textSize="17sp"
                             android:textStyle="bold"
                             tools:text="14 / 20" />
@@ -86,8 +86,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        app:indicatorColor="@color/green_dark"
-                        app:trackColor="@color/gray_light"
+                        app:indicatorColor="@color/primary"
+                        app:trackColor="@color/track"
                         app:trackCornerRadius="6dp"
                         app:trackThickness="12dp"
                         tools:progress="70" />
@@ -117,7 +117,7 @@
                             android:id="@+id/txtStreak"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/text_dark"
+                            android:textColor="@color/text_primary"
                             android:textSize="28sp"
                             android:textStyle="bold"
                             tools:text="6 days" />
@@ -126,7 +126,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/daily_streak"
-                            android:textColor="@color/text_gray"
+                            android:textColor="@color/text_secondary"
                             android:textSize="14sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -147,7 +147,7 @@
                             android:id="@+id/txtAccuracy"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/text_dark"
+                            android:textColor="@color/text_primary"
                             android:textSize="28sp"
                             android:textStyle="bold"
                             tools:text="82%" />
@@ -156,17 +156,17 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/accuracy_today"
-                            android:textColor="@color/text_gray"
+                            android:textColor="@color/text_secondary"
                             android:textSize="14sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
-            <!-- ===== Next free moment (pale green card) ===== -->
+            <!-- ===== Next free moment (pale blue card) ===== -->
             <com.google.android.material.card.MaterialCardView
                 style="@style/AppCard"
                 android:layout_marginTop="12dp"
-                app:cardBackgroundColor="@color/green_pale"
+                app:cardBackgroundColor="@color/blue_pale"
                 app:strokeWidth="0dp">
 
                 <LinearLayout
@@ -181,7 +181,7 @@
                         android:letterSpacing="0.05"
                         android:text="@string/next_free_moment"
                         android:textAllCaps="true"
-                        android:textColor="@color/green_dark"
+                        android:textColor="@color/blue_deep"
                         android:textSize="13sp"
                         android:textStyle="bold" />
 
@@ -191,7 +191,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="@string/moment_time"
-                        android:textColor="@color/text_dark"
+                        android:textColor="@color/text_primary"
                         android:textSize="32sp"
                         android:textStyle="bold" />
 
@@ -201,7 +201,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="@string/moment_description"
-                        android:textColor="@color/text_dark"
+                        android:textColor="@color/text_primary"
                         android:textSize="16sp" />
 
                     <com.google.android.material.button.MaterialButton
@@ -210,13 +210,13 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
                         android:text="@string/why_now"
-                        android:textColor="@color/text_dark"
+                        android:textColor="@color/text_primary"
                         android:textSize="16sp"
                         app:backgroundTint="@color/white"
                         app:cornerRadius="14dp"
                         app:icon="@drawable/ic_clock"
                         app:iconGravity="textStart"
-                        app:iconTint="@color/text_dark" />
+                        app:iconTint="@color/text_primary" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -226,7 +226,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:text="@string/active_subjects"
-                android:textColor="@color/text_dark"
+                android:textColor="@color/text_primary"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
@@ -248,7 +248,7 @@
                         android:importantForAccessibility="no"
                         android:padding="12dp"
                         android:src="@drawable/ic_subjects"
-                        app:tint="@color/green_dark" />
+                        app:tint="@color/primary" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -261,7 +261,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/subject_1"
-                            android:textColor="@color/text_dark"
+                            android:textColor="@color/text_primary"
                             android:textSize="17sp"
                             android:textStyle="bold" />
 
@@ -270,7 +270,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
                             android:text="@string/subject_1_sub"
-                            android:textColor="@color/text_gray"
+                            android:textColor="@color/text_secondary"
                             android:textSize="14sp" />
                     </LinearLayout>
 
@@ -278,7 +278,7 @@
                         android:id="@+id/txtSubject1Percent"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/text_dark"
+                        android:textColor="@color/text_primary"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         tools:text="62%" />
@@ -300,10 +300,11 @@
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:background="@drawable/bg_icon_square"
+                        android:backgroundTint="@color/blue_pale"
                         android:importantForAccessibility="no"
                         android:padding="12dp"
                         android:src="@drawable/ic_subjects"
-                        app:tint="@color/green_dark" />
+                        app:tint="@color/blue_deep" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -316,7 +317,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/subject_2"
-                            android:textColor="@color/text_dark"
+                            android:textColor="@color/text_primary"
                             android:textSize="17sp"
                             android:textStyle="bold" />
 
@@ -325,7 +326,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
                             android:text="@string/subject_2_sub"
-                            android:textColor="@color/text_gray"
+                            android:textColor="@color/text_secondary"
                             android:textSize="14sp" />
                     </LinearLayout>
 
@@ -333,7 +334,7 @@
                         android:id="@+id/txtSubject2Percent"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/text_dark"
+                        android:textColor="@color/text_primary"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         tools:text="35%" />
@@ -350,7 +351,7 @@
                 android:textColor="@color/white"
                 android:textSize="17sp"
                 android:textStyle="bold"
-                app:backgroundTint="@color/green_dark"
+                app:backgroundTint="@color/primary"
                 app:cornerRadius="16dp"
                 app:icon="@drawable/ic_add"
                 app:iconGravity="textStart"

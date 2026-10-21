@@ -3,13 +3,15 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <!-- App palette -->
-    <color name="background">#FFF0F4F5</color>
-    <color name="green_dark">#FF0F766E</color>
-    <color name="green_pale">#FFE1F0ED</color>
-    <color name="green_light">#FF7FD1C3</color>
-    <color name="text_dark">#FF14232B</color>
-    <color name="text_gray">#FF5B6B72</color>
-    <color name="gray_light">#FFE3E8EA</color>
-    <color name="card_stroke">#FFE3E8EA</color>
+    <!-- App palette: lavender + blue, all tones related -->
+    <color name="primary">#FF7B5EA7</color>         <!-- lavender purple: buttons, progress, selected tab (white text on it OK) -->
+    <color name="lavender_pale">#FFEFE7F8</color>   <!-- pale lavender: icon squares, selected tab pill -->
+    <color name="blue_pale">#FFD6F0FF</color>       <!-- pale blue: highlight card, second subject -->
+    <color name="blue_deep">#FF00273D</color>       <!-- deep navy: text/icons on pale blue -->
+
+    <color name="background">#FFFAF7FC</color>      <!-- lilac-tinted white -->
+    <color name="text_primary">#FF2B2236</color>    <!-- deep plum, almost black -->
+    <color name="text_secondary">#FF6E6479</color>  <!-- muted plum gray -->
+    <color name="track">#FFEDE6F4</color>           <!-- empty part of the progress bar -->
+    <color name="card_stroke">#FFECE5F2</color>     <!-- thin card outline -->
 </resources>
