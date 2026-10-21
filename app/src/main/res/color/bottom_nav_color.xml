@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icon and label color in the bottom bar: green when selected, gray otherwise -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/green_dark" android:state_checked="true" />
+    <item android:color="@color/text_gray" />
+</selector>

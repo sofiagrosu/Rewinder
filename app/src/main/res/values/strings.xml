@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AplicatiaNoastra</string>
+
+    <!-- Home screen -->
+    <string name="greeting">Good afternoon</string>
+    <string name="solved_today">You\'ve answered %1$d questions today</string>
+    <string name="daily_goal">Daily goal</string>
+    <string name="goal_format">%1$d / %2$d</string>
+    <string name="daily_streak">Daily streak</string>
+    <string name="days_format">%1$d days</string>
+    <string name="accuracy_today">Accuracy today</string>
+    <string name="percent_format">%1$d%%</string>
+    <string name="next_free_moment">Next estimated free moment</string>
+    <string name="moment_time">~1:40 PM</string>
+    <string name="moment_description">Break after class: your calendar is free.</string>
+    <string name="why_now">Why now?</string>
+    <string name="active_subjects">Active subjects</string>
+    <string name="subject_1">Anatomy · Brachial plexus</string>
+    <string name="subject_1_sub">9 questions in rotation</string>
+    <string name="subject_2">Physiology · Cardiac cycle</string>
+    <string name="subject_2_sub">14 questions in rotation</string>
+    <string name="upload_material">Upload material</string>
+
+    <!-- Bottom navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_subjects">Subjects</string>
+    <string name="nav_stats">Stats</string>
+    <string name="nav_settings">Settings</string>
+</resources>

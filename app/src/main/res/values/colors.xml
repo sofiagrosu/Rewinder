@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- App palette -->
+    <color name="background">#FFF0F4F5</color>
+    <color name="green_dark">#FF0F766E</color>
+    <color name="green_pale">#FFE1F0ED</color>
+    <color name="green_light">#FF7FD1C3</color>
+    <color name="text_dark">#FF14232B</color>
+    <color name="text_gray">#FF5B6B72</color>
+    <color name="gray_light">#FFE3E8EA</color>
+    <color name="card_stroke">#FFE3E8EA</color>
+</resources>
