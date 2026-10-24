@@ -1,0 +1,8 @@
+<!--  One row of "Materiile cele mai slabe" on Stats. Filled from StatsFragment.  -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:orientation="vertical">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+        <TextView android:id="@+id/txtWeakName" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/text_primary" android:textSize="17sp" tools:text="Programare"/>
+        <TextView android:id="@+id/txtWeakPercent" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_primary" android:textSize="17sp" android:textStyle="bold" tools:text="10%"/>
+    </LinearLayout>
+    <com.google.android.material.progressindicator.LinearProgressIndicator android:id="@+id/progressWeak" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" app:trackColor="@color/track" app:trackCornerRadius="4dp" app:trackThickness="8dp" tools:progress="10"/>
+</LinearLayout>

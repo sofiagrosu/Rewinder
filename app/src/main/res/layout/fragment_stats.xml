@@ -1,0 +1,36 @@
+<!--  Statistici: success rate ring, questions per day chart, weakest subjects  -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true" android:scrollbars="none">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/stats_title" android:textColor="@color/text_primary" android:textSize="32sp" android:textStyle="bold"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="@string/stats_subtitle" android:textColor="@color/text_secondary" android:textSize="16sp"/>
+        <!--  ===== Success rate =====  -->
+        <com.google.android.material.card.MaterialCardView style="@style/AppCard" android:layout_marginTop="20dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal" android:padding="20dp">
+                <!--  ring with the percent written in its middle  -->
+                <FrameLayout android:layout_width="wrap_content" android:layout_height="wrap_content">
+                    <com.google.android.material.progressindicator.CircularProgressIndicator android:id="@+id/ringAccuracy" android:layout_width="wrap_content" android:layout_height="wrap_content" android:indeterminate="false" app:indicatorColor="@color/primary" app:indicatorSize="84dp" app:trackColor="@color/track" app:trackCornerRadius="6dp" app:trackThickness="12dp" tools:progress="82"/>
+                    <TextView android:id="@+id/txtRingPercent" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:textColor="@color/text_primary" android:textSize="22sp" android:textStyle="bold" tools:text="82%"/>
+                </FrameLayout>
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="20dp" android:layout_weight="1" android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/success_rate" android:textColor="@color/text_primary" android:textSize="20sp" android:textStyle="bold"/>
+                    <TextView android:id="@+id/txtGoodMoments" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:textColor="@color/text_secondary" android:textSize="15sp" tools:text="Momente bune: 71%"/>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+        <!--  ===== Questions per day =====  -->
+        <com.google.android.material.card.MaterialCardView style="@style/AppCard" android:layout_marginTop="12dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/questions_per_day" android:textColor="@color/text_primary" android:textSize="17sp" android:textStyle="bold"/>
+                <com.example.myapplication1.stats.BarChartView android:id="@+id/barChart" android:layout_width="match_parent" android:layout_height="190dp" android:layout_marginTop="8dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+        <!--  ===== Weakest subjects: rows are added from code (item_weak_subject.xml) =====  -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:text="@string/weakest_subjects" android:textColor="@color/text_primary" android:textSize="20sp" android:textStyle="bold"/>
+        <com.google.android.material.card.MaterialCardView style="@style/AppCard" android:layout_marginTop="12dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingStart="16dp" android:paddingTop="4dp" android:paddingEnd="16dp" android:paddingBottom="16dp">
+                <LinearLayout android:id="@+id/weakContainer" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical"/>
+                <TextView android:id="@+id/txtWeakEmpty" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/weak_empty" android:textColor="@color/text_secondary" android:textSize="15sp" android:visibility="gone"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+</ScrollView>
