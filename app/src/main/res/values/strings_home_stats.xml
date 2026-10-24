@@ -1,0 +1,58 @@
+<!--
+    Texts of the Home and Stats screens (person A).
+    Kept in a separate file so it does not collide with teammates' strings.xml edits.
+ -->
+<resources>
+    <!--  ===== Home =====  -->
+    <string name="greeting_morning">Bună dimineața</string>
+    <string name="greeting_day">Bună ziua</string>
+    <string name="greeting_evening">Bună seara</string>
+    <string name="solved_today">Azi ai rezolvat %1$s</string>
+    <string name="daily_goal">Obiectiv zilnic</string>
+    <string name="goal_format">%1$d / %2$d</string>
+    <string name="daily_streak">Serie zilnică</string>
+    <string name="accuracy_today">Reușită azi</string>
+    <string name="percent_format">%1$d%%</string>
+    <string name="no_percent">–</string>
+    <string name="next_free_moment">Următorul moment liber estimat</string>
+    <string name="moment_time">~13:40</string>
+    <string name="moment_description">Pauză după curs: calendarul e liber.</string>
+    <string name="why_now">De ce acum?</string>
+    <string name="active_subjects">Materii active</string>
+    <string name="in_rotation">%1$s în rotație</string>
+    <string name="upload_material">Încarcă material</string>
+    <string name="toast_why_now">Aici se va deschide ecranul „De ce acum?”</string>
+    <string name="toast_upload">Aici se va deschide ecranul „Încarcă material”</string>
+    <!--  ===== Stats =====  -->
+    <string name="stats_title">Statistici</string>
+    <string name="stats_subtitle">Ultimele 7 zile</string>
+    <string name="success_rate">Procent de reușită</string>
+    <string name="good_moments_format">Momente bune: %1$d%%</string>
+    <string name="good_moments_none">Momente bune: –</string>
+    <string name="questions_per_day">Întrebări pe zi</string>
+    <string name="weakest_subjects">Materiile cele mai slabe</string>
+    <string name="weak_empty">Încă nu ai răspuns la nicio întrebare.</string>
+    <!--  ===== Temporary screens =====  -->
+    <string name="placeholder_coming_soon">%1$s: în lucru</string>
+    <!--  ===== Romanian plurals: {one, few, other}. See util/RoPlural.java =====  -->
+    <string-array name="plural_questions">
+        <item>%d întrebare</item>
+        <item>%d întrebări</item>
+        <item>%d de întrebări</item>
+    </string-array>
+    <string-array name="plural_days">
+        <item>%d zi</item>
+        <item>%d zile</item>
+        <item>%d de zile</item>
+    </string-array>
+    <!--  Monday ... Sunday  -->
+    <string-array name="weekday_initials">
+        <item>L</item>
+        <item>M</item>
+        <item>M</item>
+        <item>J</item>
+        <item>V</item>
+        <item>S</item>
+        <item>D</item>
+    </string-array>
+</resources>

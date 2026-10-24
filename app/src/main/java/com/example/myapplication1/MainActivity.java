@@ -1,33 +1,27 @@
 package com.example.myapplication1;
 
 import android.os.Bundle;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.fragment.app.Fragment;
 
+import com.example.myapplication1.home.HomeFragment;
+import com.example.myapplication1.stats.StatsFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 /**
- * Home screen.
- * The XML (activity_main.xml) says HOW the screen looks;
- * this class says WHAT data appears in it and WHAT happens on taps.
+ * The frame of the app: a container (R.id.fragmentContainer) + the bottom navigation bar.
+ * It contains NO screen content. Each tab is a Fragment in its own package
+ * (home/, subjects/, stats/, settings/).
+ *
+ * TEAMMATES: when your fragment is ready, replace the matching PlaceholderFragment line
+ * in fragmentFor() below with your fragment, e.g. "return new SubjectsFragment();".
  */
 public class MainActivity extends AppCompatActivity {
-
-    // Screen data. Hard-coded for now; later it will come from the database.
-    private int questionsToday = 14;
-    private int dailyGoal = 20;
-    private int streakDays = 6;
-    private int accuracyPercent = 82;
-    private int subject1Percent = 62;
-    private int subject2Percent = 35;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,39 +34,34 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        // ---- 1. Bind the XML views to Java objects ----
-        TextView txtSolvedToday = findViewById(R.id.txtSolvedToday);
-        TextView txtGoal = findViewById(R.id.txtGoal);
-        LinearProgressIndicator progressGoal = findViewById(R.id.progressGoal);
-        TextView txtStreak = findViewById(R.id.txtStreak);
-        TextView txtAccuracy = findViewById(R.id.txtAccuracy);
-        TextView txtSubject1Percent = findViewById(R.id.txtSubject1Percent);
-        TextView txtSubject2Percent = findViewById(R.id.txtSubject2Percent);
-        MaterialButton btnWhyNow = findViewById(R.id.btnWhyNow);
-        MaterialButton btnUpload = findViewById(R.id.btnUpload);
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
-
-        // ---- 2. Put the data on screen ----
-        // getString(id, a, b) takes the text from strings.xml and replaces %1$d, %2$d with a, b
-        txtSolvedToday.setText(getString(R.string.solved_today, questionsToday));
-        txtGoal.setText(getString(R.string.goal_format, questionsToday, dailyGoal));
-        progressGoal.setMax(dailyGoal);
-        progressGoal.setProgress(questionsToday);
-        txtStreak.setText(getString(R.string.days_format, streakDays));
-        txtAccuracy.setText(getString(R.string.percent_format, accuracyPercent));
-        txtSubject1Percent.setText(getString(R.string.percent_format, subject1Percent));
-        txtSubject2Percent.setText(getString(R.string.percent_format, subject2Percent));
-
-        // ---- 3. What happens on taps (just a message for now) ----
-        btnWhyNow.setOnClickListener(view ->
-                Toast.makeText(this, "The \"Why now?\" screen will open here", Toast.LENGTH_SHORT).show());
-
-        btnUpload.setOnClickListener(view ->
-                Toast.makeText(this, "The \"Upload material\" screen will open here", Toast.LENGTH_SHORT).show());
-
         bottomNav.setOnItemSelectedListener(item -> {
-            Toast.makeText(this, item.getTitle(), Toast.LENGTH_SHORT).show();
+            Fragment fragment = fragmentFor(item.getItemId());
+            if (fragment == null) return false;
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragmentContainer, fragment)
+                    .commit();
             return true;   // true = the tapped tab becomes the selected one
         });
+
+        // First launch: show Home. After a rotation Android restores the fragment by itself.
+        if (savedInstanceState == null) {
+            bottomNav.setSelectedItemId(R.id.nav_home);
+        }
+    }
+
+    /** Which fragment belongs to which tab. (if/else, because R.id values are not constants.) */
+    private Fragment fragmentFor(int menuItemId) {
+        if (menuItemId == R.id.nav_home) {
+            return new HomeFragment();
+        } else if (menuItemId == R.id.nav_subjects) {
+            return PlaceholderFragment.newInstance(getString(R.string.nav_subjects));   // TODO SubjectsFragment
+        } else if (menuItemId == R.id.nav_stats) {
+            return new StatsFragment();
+        } else if (menuItemId == R.id.nav_settings) {
+            return PlaceholderFragment.newInstance(getString(R.string.nav_settings));   // TODO SettingsFragment
+        }
+        return null;
     }
 }
