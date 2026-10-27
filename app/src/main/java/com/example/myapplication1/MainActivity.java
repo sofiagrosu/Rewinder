@@ -1,18 +1,11 @@
 package com.example.myapplication1;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -20,16 +13,6 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
-
-import com.example.myapplication1.quiz.QuizCoordinator;
-import com.example.myapplication1.quiz.delivery.QuizNotifications;
-import com.example.myapplication1.quiz.trigger.MomentCondition;
-import com.example.myapplication1.quiz.trigger.MomentDetector;
-import com.example.myapplication1.quiz.trigger.TriggerManager;
-import com.example.myapplication1.quiz.trigger.detectors.IntervalDetector;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Home screen.
@@ -45,17 +28,6 @@ public class MainActivity extends AppCompatActivity {
     private int accuracyPercent = 82;
     private int subject1Percent = 62;
     private int subject2Percent = 35;
-
-    // ---- Quiz trigger: decides WHEN a question should be sent ----
-    private TriggerManager triggerManager;
-
-    // ---- Quiz notifications: asks the user for permission and tells us the answer ----
-    // Must be a field (registered before the activity starts), not created inside onCreate's code.
-    private final ActivityResultLauncher<String> notificationPermissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
-                String message = granted ? "Notifications allowed" : "Notifications denied";
-                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,47 +74,5 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, item.getTitle(), Toast.LENGTH_SHORT).show();
             return true;   // true = the tapped tab becomes the selected one
         });
-
-        // ---- 4. Quiz notifications setup ----
-        QuizNotifications.createChannel(this);
-        askForNotificationPermission();
-
-        // ---- 5. Quiz trigger (TEST: a "free moment" every 20 seconds while the app is open) ----
-        List<MomentDetector> detectors = new ArrayList<>();
-        detectors.add(new IntervalDetector(20_000));
-        List<MomentCondition> conditions = new ArrayList<>();   // none yet
-        QuizCoordinator quiz = QuizCoordinator.getInstance(this);
-        triggerManager = new TriggerManager(detectors, conditions, reason -> {
-            Log.d("TRIGGER", "Moment detected: " + reason);
-            quiz.onMomentDetected(reason);   // picks the next question and sends the notification
-        });
     }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        triggerManager.start(this);   // app visible: start looking for moments
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        triggerManager.stop();        // app hidden: stop (the test timer can't run in background)
-    }
-
-    /**
-     * Shows the system dialog "Allow Rewinder to send you notifications?" if not allowed yet.
-     * The permission only exists since Android 13 (API 33); on older phones notifications
-     * are allowed by default, so there is nothing to ask.
-     */
-    private void askForNotificationPermission() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return;   // Android 12 or older
-
-        boolean alreadyGranted = ContextCompat.checkSelfPermission(
-                this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED;
-        if (!alreadyGranted) {
-            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
-        }
-    }
-    }
-
+}

@@ -14,4 +14,8 @@
     <color name="text_secondary">#FF6E6479</color>  <!-- muted plum gray -->
     <color name="track">#FFEDE6F4</color>           <!-- empty part of the progress bar -->
     <color name="card_stroke">#FFECE5F2</color>     <!-- thin card outline -->
+
+    <!-- Added for Stats: medium / weak results -->
+    <color name="warning">#FFCA8A12</color>         <!-- amber: medium results -->
+    <color name="danger">#FFB83A2F</color>          <!-- red: weak results -->
 </resources>
