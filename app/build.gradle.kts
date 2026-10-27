@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.myapplication1"
-        minSdk = 34
+        minSdk = 29   // Android 10: the oldest test phone
         targetSdk = 37
         versionCode = 1
         versionName = "1.0"

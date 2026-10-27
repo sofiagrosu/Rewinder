@@ -2,6 +2,7 @@ package com.example.myapplication1;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
@@ -129,12 +130,19 @@ public class MainActivity extends AppCompatActivity {
         triggerManager.stop();        // app hidden: stop (the test timer can't run in background)
     }
 
-    /** Shows the system dialog "Allow Rewinder to send you notifications?" if not allowed yet. */
+    /**
+     * Shows the system dialog "Allow Rewinder to send you notifications?" if not allowed yet.
+     * The permission only exists since Android 13 (API 33); on older phones notifications
+     * are allowed by default, so there is nothing to ask.
+     */
     private void askForNotificationPermission() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return;   // Android 12 or older
+
         boolean alreadyGranted = ContextCompat.checkSelfPermission(
                 this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED;
         if (!alreadyGranted) {
             notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
         }
     }
-}
+    }
+

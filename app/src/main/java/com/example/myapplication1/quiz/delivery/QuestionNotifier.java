@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
@@ -118,14 +119,25 @@ public class QuestionNotifier {
         return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
     }
 
-    @SuppressLint("MissingPermission")   // checked right below
+    @SuppressLint("MissingPermission")   // checked in canNotify()
     private void notifySafely(NotificationCompat.Builder builder) {
-        boolean allowed = ContextCompat.checkSelfPermission(context,
-                Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED;
-        if (!allowed) {
-            Log.w("QUIZ", "Notification permission not granted, nothing shown");
+        if (!canNotify()) {
+            Log.w("QUIZ", "Notifications not allowed, nothing shown");
             return;
         }
         NotificationManagerCompat.from(context).notify(QUESTION_NOTIFICATION_ID, builder.build());
+    }
+
+    /**
+     * Android 13+ (API 33): the POST_NOTIFICATIONS permission must be granted.
+     * Android 12 or older: that permission doesn't exist (checking it would say "denied"),
+     * so we only check that the user hasn't turned notifications off in Settings.
+     */
+    private boolean canNotify() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            return ContextCompat.checkSelfPermission(context,
+                    Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED;
+        }
+        return NotificationManagerCompat.from(context).areNotificationsEnabled();
     }
 }
