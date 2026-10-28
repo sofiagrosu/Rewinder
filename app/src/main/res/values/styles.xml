@@ -12,6 +12,21 @@
         <item name="strokeColor">@color/card_stroke</item>
     </style>
 
+    <!-- QUIZ: answer buttons in the question banner — white pill, dark text, up to 2 lines -->
+    <style name="QuizOptionButton" parent="Widget.Material3.Button">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="backgroundTint">@color/white</item>
+        <item name="cornerRadius">14dp</item>
+    </style>
+
     <!-- The "pill" behind the selected icon in the bottom bar -->
     <style name="AppActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
         <item name="android:color">@color/lavender_pale</item>
