@@ -133,6 +133,7 @@ public class QuizService extends Service {
                 .setContentText("Test mode: a question every 20 seconds")
                 .setOngoing(true)
                 .setSilent(true)
+                .setLocalOnly(true)   // phone only: don't bridge this to the Wear OS watch
                 .setContentIntent(open)
                 .addAction(0, "Stop", stop)
                 .build();

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icon of the answer buttons in the question notification.
+     Phones (Android 7+) don't draw action icons, but a Wear OS watch shows each action as a
+     chip with its icon + label, so without it the buttons look bare on the watch. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:pathData="M4,12 A8,8 0 1,0 20,12 A8,8 0 1,0 4,12 Z"
+        android:strokeWidth="2"
+        android:strokeColor="#FFFFFFFF" />
+</vector>

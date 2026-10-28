@@ -23,7 +23,15 @@ import com.example.myapplication1.data.Question;
  *   - the result after answering (✓ / ✗ + explanation), replacing the question
  * The question can't be swiped away for good during its protection time:
  * if it is, the coordinator shows it again (see QuizCoordinator.onDismissed).
- * Phone notifications are mirrored on a paired Wear OS watch automatically.
+ *
+ * WATCH: phone notifications are bridged to a paired Wear OS watch automatically, with the same
+ * NotificationCompat APIs, so there is no separate watch code. What shapes the look on the watch:
+ *   - BigTextStyle = the Wear "Big text" template: short preview in the stream, full text when
+ *     tapped, the action buttons stacked under it (max 3), plus an automatic "Open on phone";
+ *   - action icons: the watch shows each button as a chip with icon + label (R.drawable.ic_option);
+ *   - short titles/options (~20 chars) so nothing is cut on the round screen;
+ *   - the service's permanent notification is setLocalOnly(true) in QuizService, so only the
+ *     questions (and their results) reach the watch.
  */
 public class QuestionNotifier {
 
@@ -54,7 +62,9 @@ public class QuestionNotifier {
                 .setDeleteIntent(dismissIntent(question.getId()));   // told when the user swipes it away
 
         for (int n = 1; n <= question.getOptionCount(); n++) {
-            builder.addAction(0, question.getOption(n), answerIntent(question.getId(), n));
+            // the icon is only drawn on the watch (phones ignore action icons since Android 7)
+            builder.addAction(R.drawable.ic_option, question.getOption(n),
+                    answerIntent(question.getId(), n));
         }
         notifySafely(builder);
     }

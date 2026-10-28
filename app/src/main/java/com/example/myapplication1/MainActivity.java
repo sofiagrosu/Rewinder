@@ -50,9 +50,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+        // Keep the content below the status bar (top) and clear of any side bars (landscape).
+        // The BOTTOM inset is deliberately NOT applied here: BottomNavigationView adds it by
+        // itself (its background extends behind the system navigation bar, the items stay
+        // above it). Applying it here too pushed the bar up and left an empty white strip
+        // under it, very visible on phones with a 3-button navigation bar.
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
             return insets;
         });
 
