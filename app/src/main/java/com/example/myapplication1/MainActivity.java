@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment;
 import com.example.myapplication1.home.HomeFragment;
 import com.example.myapplication1.quiz.QuizService;
 import com.example.myapplication1.quiz.delivery.QuizNotifications;
+import com.example.myapplication1.quiz.ui.QuestionBanner;
 import com.example.myapplication1.stats.StatsFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -44,6 +45,9 @@ public class MainActivity extends AppCompatActivity {
                 String message = granted ? "Notifications allowed" : "Notifications denied";
                 Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
             });
+
+    // ---- QUIZ: the question waiting for an answer, as a banner above the tabs ----
+    private QuestionBanner questionBanner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +82,10 @@ public class MainActivity extends AppCompatActivity {
             bottomNav.setSelectedItemId(R.id.nav_home);
         }
 
+        // ---- QUIZ: in-app banner of the question waiting for an answer ----
+        // Shown whenever a question is pending, e.g. when the app is opened from the notification.
+        questionBanner = new QuestionBanner(findViewById(R.id.questionBanner));
+
         // ---- QUIZ: notifications setup ----
         QuizNotifications.createChannel(this);
         askForNotificationPermission();
@@ -85,6 +93,19 @@ public class MainActivity extends AppCompatActivity {
         // ---- QUIZ: start the background service that sends the questions ----
         // It keeps running when the app is closed; stop it from its notification ("Stop").
         QuizService.start(this);
+    }
+
+    // ---- QUIZ: the banner follows the quiz only while the app is on screen ----
+    @Override
+    protected void onStart() {
+        super.onStart();
+        questionBanner.start();
+    }
+
+    @Override
+    protected void onStop() {
+        questionBanner.stop();
+        super.onStop();
     }
 
     /** Which fragment belongs to which tab. (if/else, because R.id values are not constants.) */

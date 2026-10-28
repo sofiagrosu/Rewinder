@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.Log;
 
 import com.example.myapplication1.data.AnswerRecord;
-import com.example.myapplication1.data.InMemoryProgressStore;
 import com.example.myapplication1.data.ProgressStore;
 import com.example.myapplication1.data.Question;
 import com.example.myapplication1.data.QuestionRepository;
@@ -28,7 +27,7 @@ import java.util.List;
  *   - questions, subjects and the answer history come from the team's QuestionRepository
  *     (RepositoryProvider.get()), the same data Home and Stats use;
  *   - every answer is saved there as an AnswerRecord, so it shows up in Home and Stats;
- *   - the Leitner/ordering progress stays in the quiz's own ProgressStore.
+ *   - the Leitner/ordering progress is saved in the same database (RepositoryProvider.getProgressStore()).
  */
 public final class QuizCoordinator {
 
@@ -52,6 +51,13 @@ public final class QuizCoordinator {
     private long pendingShownAt = 0;
     private String pendingReason = "";
 
+    /** Whoever shows the pending question inside the app (MainActivity's QuestionBanner). */
+    public interface PendingListener {
+        /** The pending question changed: a new one was sent, or it was answered / expired. */
+        void onPendingChanged();
+    }
+    private PendingListener pendingListener;   // at most one; null while the app is not on screen
+
     public static synchronized QuizCoordinator getInstance(Context context) {
         if (instance == null) {
             instance = new QuizCoordinator(context.getApplicationContext());
@@ -61,9 +67,9 @@ public final class QuizCoordinator {
 
     private QuizCoordinator(Context appContext) {
         repository = RepositoryProvider.get();
-        // NOTE: in memory = progress is lost when Android stops the app process.
-        // Replace with a persistent store (SharedPreferences / Room) before real use.
-        ProgressStore progressStore = new InMemoryProgressStore();
+        // Leitner/ordering progress is saved in the local database (SqliteProgressStore),
+        // opened by RewinderApp: it survives when Android stops the app process.
+        ProgressStore progressStore = RepositoryProvider.getProgressStore();
         picker = QuestionPicker.withDefaultRules(progressStore);
         updater = new ProgressUpdater(progressStore);
         notifier = new QuestionNotifier(appContext);
@@ -84,12 +90,13 @@ public final class QuizCoordinator {
             Log.d(TAG, "No question to send");
             return;
         }
-        notifier.showQuestion(question, subjectTitle(question.getSubjectId()), reason,
+        notifier.showQuestion(question, getSubjectTitle(question.getSubjectId()), reason,
                 false, PROTECTION_MILLIS);
         updater.recordShown(question.getId(), now);
         pendingQuestionId = question.getId();
         pendingShownAt = now;
         pendingReason = reason;
+        notifyPendingChanged();
         Log.d(TAG, "Sent question " + question.getId() + " (" + reason + ")");
     }
 
@@ -102,13 +109,14 @@ public final class QuizCoordinator {
         }
         if (questionId == pendingQuestionId) {
             pendingQuestionId = -1;   // answered: a new question may come at the next moment
+            notifyPendingChanged();
         }
         boolean correct = question.isCorrect(chosenOption);
         long now = System.currentTimeMillis();
         updater.recordAnswer(question, correct, now);   // quiz ordering (Leitner)
         repository.saveAnswer(new AnswerRecord(          // shared history (Home, Stats)
                 question.getId(), question.getSubjectId(), now, chosenOption, correct));
-        notifier.showResult(question, subjectTitle(question.getSubjectId()), correct);
+        notifier.showResult(question, getSubjectTitle(question.getSubjectId()), correct);
         Log.d(TAG, "Question " + questionId + ": " + (correct ? "correct" : "wrong"));
     }
 
@@ -123,11 +131,12 @@ public final class QuizCoordinator {
         long elapsed = now - pendingShownAt;
         if (elapsed >= PROTECTION_MILLIS) {
             pendingQuestionId = -1;                    // protection over: let it go
+            notifyPendingChanged();
             return;
         }
         Question question = repository.getQuestion(questionId);
         if (question == null) return;
-        notifier.showQuestion(question, subjectTitle(question.getSubjectId()), pendingReason,
+        notifier.showQuestion(question, getSubjectTitle(question.getSubjectId()), pendingReason,
                 true, PROTECTION_MILLIS - elapsed);
         Log.d(TAG, "Question " + questionId + " shown again (" + (elapsed / 1000) + " s after it appeared)");
     }
@@ -136,8 +145,35 @@ public final class QuizCoordinator {
         return pendingQuestionId >= 0 && now - pendingShownAt < PROTECTION_MILLIS;
     }
 
-    /** Notification title, e.g. "Databases · SQL". */
-    private String subjectTitle(long subjectId) {
+    // ---- read by the in-app banner (display only) ----
+
+    /** The question still waiting for an answer (within its protection time), or null. */
+    public Question getPendingQuestion() {
+        if (!hasProtectedPendingQuestion(System.currentTimeMillis())) return null;
+        return repository.getQuestion(pendingQuestionId);
+    }
+
+    /** The "why now" of the pending question ("" if none). */
+    public String getPendingReason() {
+        return pendingReason;
+    }
+
+    /** How long the pending question still stays on screen, in ms (0 if none). */
+    public long getPendingRemainingMillis() {
+        long remaining = PROTECTION_MILLIS - (System.currentTimeMillis() - pendingShownAt);
+        return pendingQuestionId >= 0 && remaining > 0 ? remaining : 0;
+    }
+
+    public void setPendingListener(PendingListener listener) {
+        pendingListener = listener;
+    }
+
+    private void notifyPendingChanged() {
+        if (pendingListener != null) pendingListener.onPendingChanged();
+    }
+
+    /** Notification / banner title, e.g. "Databases · SQL". */
+    public String getSubjectTitle(long subjectId) {
         Subject subject = repository.getSubject(subjectId);
         return subject != null ? subject.getTitle() : "Rewinder";
     }

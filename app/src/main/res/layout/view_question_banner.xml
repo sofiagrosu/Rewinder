@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    QUIZ: the question banner at the top of MainActivity — the in-app version of the question
+    notification. Hidden by default; quiz/ui/QuestionBanner fills and shows it while a question
+    is waiting for an answer, then turns it into the result (✓ / ✗ + explanation + OK).
+-->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/questionBanner"
+    style="@style/AppCard"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="12dp"
+    android:layout_marginEnd="16dp"
+    android:visibility="gone"
+    app:cardBackgroundColor="@color/lavender_pale"
+    app:strokeWidth="0dp"
+    tools:visibility="visible">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- subject ("DATABASES · SQL") while asking; "✓ Correct!" / "✗ The answer was: …" afterwards -->
+        <TextView
+            android:id="@+id/txtBannerLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:letterSpacing="0.05"
+            android:textColor="@color/primary"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            tools:text="DATABASES · SQL" />
+
+        <!-- "why now" (the trigger's reason) -->
+        <TextView
+            android:id="@+id/txtBannerReason"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp"
+            tools:text="Test mode: every 20 seconds" />
+
+        <!-- the question; the explanation once answered -->
+        <TextView
+            android:id="@+id/txtBannerText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textColor="@color/text_primary"
+            android:textSize="17sp"
+            tools:text="Which SQL clause filters groups after GROUP BY?" />
+
+        <!-- one button per option; the 3rd is hidden for True/False questions -->
+        <LinearLayout
+            android:id="@+id/bannerOptions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnOption1"
+                style="@style/QuizOptionButton"
+                tools:text="WHERE" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnOption2"
+                style="@style/QuizOptionButton"
+                android:layout_marginStart="8dp"
+                tools:text="HAVING" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnOption3"
+                style="@style/QuizOptionButton"
+                android:layout_marginStart="8dp"
+                tools:text="ORDER BY" />
+        </LinearLayout>
+
+        <!-- closes the result -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnBannerOk"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/quiz_banner_ok"
+            android:textColor="@color/white"
+            android:visibility="gone"
+            app:backgroundTint="@color/primary"
+            app:cornerRadius="14dp" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

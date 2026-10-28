@@ -3,6 +3,8 @@
     The screens themselves are fragments (fragment_home.xml, fragment_stats.xml, ...).
  -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:id="@+id/main" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/background" android:orientation="vertical" tools:context=".MainActivity">
+    <!--  QUIZ: the question waiting for an answer (in-app version of the notification); hidden when there is none  -->
+    <include layout="@layout/view_question_banner"/>
     <!--  The current tab's fragment goes here. 0dp + weight=1 = "take all remaining space"  -->
     <androidx.fragment.app.FragmentContainerView android:id="@+id/fragmentContainer" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"/>
     <!--  ===== Bottom navigation bar (items come from res/menu/bottom_nav.xml) =====  -->

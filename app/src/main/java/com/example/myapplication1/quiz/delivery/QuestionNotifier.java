@@ -71,9 +71,7 @@ public class QuestionNotifier {
 
     /** Replaces the question with the result; no buttons, does not ring again. */
     public void showResult(Question question, String title, boolean correct) {
-        String headline = correct
-                ? "✓ Correct!"
-                : "✗ The answer was: " + question.getOption(question.getCorrectOption());
+        String headline = resultHeadline(question, correct);
         String body = headline;
         String explanation = question.getExplanation();
         if (explanation != null && !explanation.isEmpty()) {
@@ -86,6 +84,13 @@ public class QuestionNotifier {
                 .setOnlyAlertOnce(true)
                 .setTimeoutAfter(RESULT_VISIBLE_MILLIS);
         notifySafely(builder);
+    }
+
+    /** "✓ Correct!" or "✗ The answer was: ..." — used by the notification and by the in-app banner. */
+    public static String resultHeadline(Question question, boolean correct) {
+        return correct
+                ? "✓ Correct!"
+                : "✗ The answer was: " + question.getOption(question.getCorrectOption());
     }
 
     // ---------------------------------------------------------------------------------

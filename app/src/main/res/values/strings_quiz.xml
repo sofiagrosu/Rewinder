@@ -1,0 +1,4 @@
+<resources>
+    <!-- QUIZ: texts of the in-app question banner (view_question_banner.xml) -->
+    <string name="quiz_banner_ok">OK</string>
+</resources>
