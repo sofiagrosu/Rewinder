@@ -14,8 +14,8 @@ public class WrongAnswerPriorityRule implements ScoringRule {
         }
         else {
             // calculate the time since the question was last answered
-            long elapsedMillis = now - progress.getLastAnsweredAt();
-            long waitingMinutes = elapsedMillis / 60_000;
+            double elapsedMillis = now - progress.getLastAnsweredAt();
+            double waitingMinutes = elapsedMillis / 60_000;
             // in order to normalize the value of the calculated waiting Minutes,
             // we choose 60 minutes as the refference "middle" value T
             final int T = 60;
