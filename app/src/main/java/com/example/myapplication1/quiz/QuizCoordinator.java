@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.Log;
 
 import com.example.myapplication1.data.AnswerRecord;
-import com.example.myapplication1.data.InMemoryProgressStore;
 import com.example.myapplication1.data.ProgressStore;
 import com.example.myapplication1.data.Question;
 import com.example.myapplication1.data.QuestionRepository;
@@ -28,7 +27,7 @@ import java.util.List;
  *   - questions, subjects and the answer history come from the team's QuestionRepository
  *     (RepositoryProvider.get()), the same data Home and Stats use;
  *   - every answer is saved there as an AnswerRecord, so it shows up in Home and Stats;
- *   - the Leitner/ordering progress stays in the quiz's own ProgressStore.
+ *   - the Leitner/ordering progress is saved in the same database (RepositoryProvider.getProgressStore()).
  */
 public final class QuizCoordinator {
 
@@ -68,9 +67,9 @@ public final class QuizCoordinator {
 
     private QuizCoordinator(Context appContext) {
         repository = RepositoryProvider.get();
-        // NOTE: in memory = progress is lost when Android stops the app process.
-        // Replace with a persistent store (SharedPreferences / Room) before real use.
-        ProgressStore progressStore = new InMemoryProgressStore();
+        // Leitner/ordering progress is saved in the local database (SqliteProgressStore),
+        // opened by RewinderApp: it survives when Android stops the app process.
+        ProgressStore progressStore = RepositoryProvider.getProgressStore();
         picker = QuestionPicker.withDefaultRules(progressStore);
         updater = new ProgressUpdater(progressStore);
         notifier = new QuestionNotifier(appContext);
