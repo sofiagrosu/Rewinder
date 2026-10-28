@@ -24,10 +24,10 @@ import java.util.Random;
  */
 public final class SampleData {
 
-    public static final long ALGORITMI = 1;
-    public static final long BAZE_DE_DATE = 2;
-    public static final long RETELE = 3;
-    public static final long POO = 4;
+    public static final long ALGORITHMS = 1;
+    public static final long DATABASES = 2;
+    public static final long NETWORKS = 3;
+    public static final long OOP = 4;
 
     private static final long HOUR = 60L * 60L * 1000L;
 
@@ -49,10 +49,10 @@ public final class SampleData {
 
     public static List<Subject> subjects() {
         List<Subject> list = new ArrayList<>();
-        list.add(new Subject(ALGORITMI, "Algoritmi", "Sortare și căutare", LocalDate.of(2026, 11, 12)));
-        list.add(new Subject(BAZE_DE_DATE, "Baze de date", "SQL", LocalDate.of(2026, 11, 20)));
-        list.add(new Subject(RETELE, "Rețele", "Modelul TCP/IP", null));
-        list.add(new Subject(POO, "Programare", "POO în Java", null));
+        list.add(new Subject(ALGORITHMS, "Algorithms", "Sorting and searching", LocalDate.of(2026, 11, 12)));
+        list.add(new Subject(DATABASES, "Databases", "SQL", LocalDate.of(2026, 11, 20)));
+        list.add(new Subject(NETWORKS, "Networks", "The TCP/IP model", null));
+        list.add(new Subject(OOP, "Programming", "OOP in Java", null));
         return list;
     }
 
@@ -61,102 +61,102 @@ public final class SampleData {
     public static List<Question> questions() {
         List<Question> q = new ArrayList<>();
 
-        // ---- Algoritmi · Sortare și căutare ----
-        q.add(tf(101, ALGORITMI, "Complexitatea medie a algoritmului Quick Sort este O(n log n).", true,
-                "În cazul mediu Quick Sort este O(n log n); cazul cel mai defavorabil este O(n²)."));
-        q.add(two(102, ALGORITMI, "Care dintre acești algoritmi de sortare este stabil?",
-                "Merge Sort", "Quick Sort (varianta clasică)", 1,
-                "Merge Sort păstrează ordinea elementelor egale; Quick Sort în varianta obișnuită nu o garantează."));
-        q.add(tf(103, ALGORITMI, "Insertion Sort are complexitatea O(n) pe un tablou deja sortat.", true,
-                "Pe un tablou sortat, fiecare element este comparat o singură dată, deci timpul este liniar."));
-        q.add(three(104, ALGORITMI, "Complexitatea algoritmului Merge Sort, în toate cazurile, este:",
+        // ---- Algorithms · Sorting and searching ----
+        q.add(tf(101, ALGORITHMS, "The average-case complexity of Quick Sort is O(n log n).", true,
+                "On average Quick Sort is O(n log n); the worst case is O(n²)."));
+        q.add(two(102, ALGORITHMS, "Which of these sorting algorithms is stable?",
+                "Merge Sort", "Quick Sort", 1,
+                "Merge Sort keeps the order of equal elements; classic Quick Sort does not guarantee it."));
+        q.add(tf(103, ALGORITHMS, "Insertion Sort runs in O(n) on an array that is already sorted.", true,
+                "On a sorted array each element is compared only once, so the time is linear."));
+        q.add(three(104, ALGORITHMS, "The complexity of Merge Sort, in every case, is:",
                 "O(n log n)", "O(n²)", "O(n)", 1,
-                "Merge Sort împarte tabloul în jumătăți (log n niveluri) și interclasează în O(n) pe fiecare nivel."));
-        q.add(tf(105, ALGORITMI, "Căutarea binară funcționează corect pe un tablou nesortat.", false,
-                "Căutarea binară cere ca elementele să fie sortate."));
-        q.add(two(106, ALGORITMI, "Căutarea binară are complexitatea:",
+                "Merge Sort splits the array in halves (log n levels) and merges in O(n) on each level."));
+        q.add(tf(105, ALGORITHMS, "Binary search works correctly on an unsorted array.", false,
+                "Binary search requires the elements to be sorted."));
+        q.add(two(106, ALGORITHMS, "The complexity of binary search is:",
                 "O(log n)", "O(n)", 1,
-                "La fiecare pas, spațiul de căutare se înjumătățește."));
-        q.add(three(107, ALGORITMI, "Algoritmul Heap Sort folosește structura de date:",
-                "Heap (ansamblu)", "Stivă", "Coadă", 1,
-                "Heap Sort construiește un heap și extrage repetat elementul maxim (sau minim)."));
-        q.add(tf(108, ALGORITMI, "Selection Sort face O(n²) comparații chiar și pe un tablou deja sortat.", true,
-                "Selection Sort caută minimul în partea nesortată la fiecare pas, indiferent de ordinea inițială."));
+                "At every step the search space is cut in half."));
+        q.add(three(107, ALGORITHMS, "Heap Sort uses which data structure?",
+                "Heap", "Stack", "Queue", 1,
+                "Heap Sort builds a heap and repeatedly extracts the maximum (or minimum) element."));
+        q.add(tf(108, ALGORITHMS, "Selection Sort makes O(n²) comparisons even on an already sorted array.", true,
+                "Selection Sort searches for the minimum of the unsorted part at every step, whatever the initial order."));
 
-        // ---- Baze de date · SQL ----
-        q.add(tf(201, BAZE_DE_DATE, "Clauza WHERE filtrează rândurile înainte de grupare.", true,
-                "WHERE se aplică rândurilor, înainte de GROUP BY; HAVING filtrează grupurile după grupare."));
-        q.add(two(202, BAZE_DE_DATE, "Care clauză filtrează grupurile create de GROUP BY?",
+        // ---- Databases · SQL ----
+        q.add(tf(201, DATABASES, "The WHERE clause filters rows before grouping.", true,
+                "WHERE applies to rows, before GROUP BY; HAVING filters the groups after grouping."));
+        q.add(two(202, DATABASES, "Which clause filters the groups created by GROUP BY?",
                 "HAVING", "WHERE", 1,
-                "HAVING se aplică după grupare și poate folosi funcții de agregare, spre deosebire de WHERE."));
-        q.add(three(203, BAZE_DE_DATE, "Ce tip de JOIN returnează doar rândurile care au corespondent în ambele tabele?",
+                "HAVING is applied after grouping and can use aggregate functions, unlike WHERE."));
+        q.add(three(203, DATABASES, "Which JOIN returns only the rows that have a match in both tables?",
                 "INNER JOIN", "LEFT JOIN", "FULL OUTER JOIN", 1,
-                "INNER JOIN păstrează doar rândurile care îndeplinesc condiția de legătură în ambele tabele."));
-        q.add(tf(204, BAZE_DE_DATE, "O cheie primară poate conține valori NULL.", false,
-                "Cheia primară identifică unic fiecare rând, deci nu poate fi NULL."));
-        q.add(three(205, BAZE_DE_DATE, "Comanda SQL care șterge rândurile ce respectă o condiție este:",
+                "INNER JOIN keeps only the rows that meet the join condition in both tables."));
+        q.add(tf(204, DATABASES, "A primary key can contain NULL values.", false,
+                "The primary key uniquely identifies each row, so it cannot be NULL."));
+        q.add(three(205, DATABASES, "The SQL command that deletes the rows matching a condition is:",
                 "DELETE", "DROP", "REMOVE", 1,
-                "DELETE șterge rânduri; DROP șterge un tabel întreg; REMOVE nu există în SQL standard."));
-        q.add(two(206, BAZE_DE_DATE, "Ce înseamnă litera „A” din ACID?",
-                "Atomicitate", "Autorizare", 1,
-                "ACID = Atomicitate, Consistență, Izolare, Durabilitate."));
-        q.add(tf(207, BAZE_DE_DATE, "O cheie străină face referire, de obicei, la cheia primară a altui tabel.", true,
-                "Cheia străină leagă două tabele și asigură integritatea referențială."));
-        q.add(three(208, BAZE_DE_DATE, "Funcția SQL care numără rândurile dintr-un grup este:",
+                "DELETE removes rows; DROP removes a whole table; REMOVE does not exist in standard SQL."));
+        q.add(two(206, DATABASES, "What does the letter \"A\" in ACID stand for?",
+                "Atomicity", "Authorization", 1,
+                "ACID = Atomicity, Consistency, Isolation, Durability."));
+        q.add(tf(207, DATABASES, "A foreign key usually refers to the primary key of another table.", true,
+                "A foreign key links two tables and ensures referential integrity."));
+        q.add(three(208, DATABASES, "The SQL function that counts the rows in a group is:",
                 "COUNT", "SUM", "AVG", 1,
-                "COUNT numără rândurile; SUM adună valori; AVG calculează media."));
+                "COUNT counts rows; SUM adds up values; AVG computes the average."));
 
-        // ---- Rețele · Modelul TCP/IP ----
-        q.add(tf(301, RETELE, "TCP garantează livrarea ordonată a datelor.", true,
-                "TCP folosește numere de secvență și confirmări, deci datele ajung complete și în ordine."));
-        q.add(two(302, RETELE, "Care dintre aceste protocoale este fără conexiune?",
+        // ---- Networks · The TCP/IP model ----
+        q.add(tf(301, NETWORKS, "TCP guarantees that data is delivered in order.", true,
+                "TCP uses sequence numbers and acknowledgements, so data arrives complete and in order."));
+        q.add(two(302, NETWORKS, "Which of these protocols is connectionless?",
                 "UDP", "TCP", 1,
-                "UDP trimite datagrame fără a stabili o conexiune și fără confirmări."));
-        q.add(three(303, RETELE, "Portul implicit pentru HTTPS este:",
+                "UDP sends datagrams without setting up a connection and without acknowledgements."));
+        q.add(three(303, NETWORKS, "The default port for HTTPS is:",
                 "443", "80", "21", 1,
-                "HTTPS folosește portul 443; HTTP folosește 80, iar FTP folosește 21."));
-        q.add(tf(304, RETELE, "Adresa IP 192.168.1.10 este o adresă privată.", true,
-                "Intervalul 192.168.0.0 - 192.168.255.255 este rezervat pentru rețele private."));
-        q.add(two(305, RETELE, "Ce protocol traduce numele de domenii în adrese IP?",
+                "HTTPS uses port 443; HTTP uses 80 and FTP uses 21."));
+        q.add(tf(304, NETWORKS, "The IP address 192.168.1.10 is a private address.", true,
+                "The range 192.168.0.0 - 192.168.255.255 is reserved for private networks."));
+        q.add(two(305, NETWORKS, "Which protocol translates domain names into IP addresses?",
                 "DNS", "ARP", 1,
-                "DNS (Domain Name System) rezolvă nume precum example.com în adrese IP."));
-        q.add(three(306, RETELE, "Câți biți are o adresă IPv4?",
+                "DNS (Domain Name System) resolves names like example.com into IP addresses."));
+        q.add(three(306, NETWORKS, "How many bits does an IPv4 address have?",
                 "32", "64", "128", 1,
-                "IPv4 are 32 de biți (4 octeți); IPv6 are 128 de biți."));
-        q.add(tf(307, RETELE, "Protocolul HTTP criptează implicit datele transmise.", false,
-                "HTTP transmite datele necriptat; criptarea este oferită de HTTPS (HTTP peste TLS)."));
-        q.add(three(308, RETELE, "Ce protocol atribuie automat adrese IP dispozitivelor dintr-o rețea?",
+                "IPv4 has 32 bits (4 bytes); IPv6 has 128 bits."));
+        q.add(tf(307, NETWORKS, "HTTP encrypts the transmitted data by default.", false,
+                "HTTP sends data unencrypted; encryption is provided by HTTPS (HTTP over TLS)."));
+        q.add(three(308, NETWORKS, "Which protocol automatically assigns IP addresses to the devices in a network?",
                 "DHCP", "DNS", "ARP", 1,
-                "DHCP oferă automat adresa IP, masca de rețea și gateway-ul."));
+                "DHCP automatically provides the IP address, subnet mask and gateway."));
 
-        // ---- Programare · POO în Java ----
-        q.add(tf(401, POO, "În Java, o clasă poate moșteni direct de la două clase.", false,
-                "Java nu permite moștenirea multiplă de clase; o clasă poate însă implementa mai multe interfețe."));
-        q.add(two(402, POO, "Ce cuvânt cheie împiedică moștenirea unei clase în Java?",
+        // ---- Programming · OOP in Java ----
+        q.add(tf(401, OOP, "In Java, a class can directly extend two classes.", false,
+                "Java does not allow multiple inheritance of classes; a class can, however, implement several interfaces."));
+        q.add(two(402, OOP, "Which keyword prevents a class from being extended in Java?",
                 "final", "static", 1,
-                "O clasă declarată final nu poate fi extinsă."));
-        q.add(three(403, POO, "Ce principiu POO ascunde detaliile interne ale unui obiect?",
-                "Încapsularea", "Moștenirea", "Polimorfismul", 1,
-                "Încapsularea ascunde starea internă și expune doar metode publice."));
-        q.add(tf(404, POO, "O clasă abstractă poate fi instanțiată direct.", false,
-                "Clasele abstracte nu pot fi instanțiate; se instanțiază doar clasele concrete derivate din ele."));
-        q.add(two(405, POO, "Suprascrierea (override) unei metode presupune:",
-                "Aceeași semnătură, în clasa derivată", "Același nume, dar alți parametri", 1,
-                "A doua variantă descrie supraîncărcarea (overload)."));
-        q.add(three(406, POO, "Ce modificator de acces face un membru vizibil doar în propria clasă?",
+                "A class declared final cannot be extended."));
+        q.add(three(403, OOP, "Which OOP principle hides the internal details of an object?",
+                "Encapsulation", "Inheritance", "Polymorphism", 1,
+                "Encapsulation hides the internal state and exposes only public methods."));
+        q.add(tf(404, OOP, "An abstract class can be instantiated directly.", false,
+                "Abstract classes cannot be instantiated; only the concrete classes derived from them can."));
+        q.add(two(405, OOP, "Overriding a method means, in the subclass:",
+                "Same signature", "Same name, new params", 1,
+                "The second option describes overloading."));
+        q.add(three(406, OOP, "Which access modifier makes a member visible only inside its own class?",
                 "private", "protected", "public", 1,
-                "private limitează accesul la clasa în care este declarat membrul."));
-        q.add(tf(407, POO, "Într-o interfață Java se pot declara metode fără implementare.", true,
-                "Metodele unei interfețe sunt abstracte în mod implicit, iar clasele care o implementează le definesc."));
-        q.add(two(408, POO, "Ce valoare implicită are un câmp de tip obiect, neinițializat, al unei clase?",
+                "private limits access to the class in which the member is declared."));
+        q.add(tf(407, OOP, "A Java interface can declare methods without an implementation.", true,
+                "Interface methods are abstract by default, and the classes that implement the interface define them."));
+        q.add(two(408, OOP, "What is the default value of an uninitialized object field of a class?",
                 "null", "0", 1,
-                "Câmpurile de tip referință sunt inițializate implicit cu null."));
+                "Reference-type fields are initialized with null by default."));
 
         return q;
     }
 
     private static Question tf(long id, long subjectId, String text, boolean isTrue, String explanation) {
-        return new Question(id, subjectId, text, "Adevărat", "Fals", null, isTrue ? 1 : 2, explanation);
+        return new Question(id, subjectId, text, "True", "False", null, isTrue ? 1 : 2, explanation);
     }
 
     private static Question two(long id, long subjectId, String text,
@@ -173,11 +173,11 @@ public final class SampleData {
 
     /**
      * 71 answers over the last 7 days (6 days ago has none, so the streak is 6).
-     * Per subject accuracy: Algoritmi 62%, Baze de date 35%, Rețele 80%, Programare 10%.
+     * Per subject accuracy: Algorithms 62%, Databases 35%, Networks 80%, Programming 10%.
      * Always looks the same (fixed random seed), relative to "now".
      */
     public static List<AnswerRecord> answerHistory(List<Question> questions, long now, ZoneId zone) {
-        long[] subjectIds = {ALGORITMI, BAZE_DE_DATE, RETELE, POO};
+        long[] subjectIds = {ALGORITHMS, DATABASES, NETWORKS, OOP};
         int[][] plan = {{21, 13}, {20, 7}, {20, 16}, {10, 1}};   // {answers, correct} per subject
         int[] perDay = {0, 10, 14, 8, 17, 8, 14};                // index 0 = 6 days ago ... 6 = today
 
@@ -237,7 +237,7 @@ public final class SampleData {
         return q.getCorrectOption();
     }
 
-    /** 7 "A fost un moment bun?" answers, 5 of them "Da" -> 71%. */
+    /** 7 "Was this a good moment?" answers, 5 of them "Yes" -> 71%. */
     public static List<MomentFeedback> momentFeedback(long now) {
         boolean[] good = {true, true, false, true, true, false, true};
         List<MomentFeedback> list = new ArrayList<>();

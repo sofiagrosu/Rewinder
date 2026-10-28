@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -18,17 +17,11 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.myapplication1.home.HomeFragment;
-import com.example.myapplication1.quiz.QuizCoordinator;
+import com.example.myapplication1.quiz.QuizService;
 import com.example.myapplication1.quiz.delivery.QuizNotifications;
-import com.example.myapplication1.quiz.trigger.MomentCondition;
-import com.example.myapplication1.quiz.trigger.MomentDetector;
-import com.example.myapplication1.quiz.trigger.TriggerManager;
-import com.example.myapplication1.quiz.trigger.detectors.IntervalDetector;
 import com.example.myapplication1.stats.StatsFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The frame of the app: a container (R.id.fragmentContainer) + the bottom navigation bar.
@@ -38,13 +31,11 @@ import java.util.List;
  * TEAMMATES: when your fragment is ready, replace the matching PlaceholderFragment line
  * in fragmentFor() below with your fragment, e.g. "return new SubjectsFragment();".
  *
- * It also starts the quiz (notification permission + trigger), because that belongs
- * to the whole app, not to one tab. Quiz code: see the "QUIZ" sections below.
+ * It also starts the quiz (notification permission + QuizService, which runs the trigger
+ * in the background), because that belongs to the whole app, not to one tab.
+ * Quiz code: see the "QUIZ" sections below.
  */
 public class MainActivity extends AppCompatActivity {
-
-    // ---- QUIZ: decides WHEN a question should be sent ----
-    private TriggerManager triggerManager;
 
     // ---- QUIZ: asks the user for the notification permission and tells us the answer ----
     // Must be a field (registered before the activity starts), not created inside onCreate's code.
@@ -86,27 +77,9 @@ public class MainActivity extends AppCompatActivity {
         QuizNotifications.createChannel(this);
         askForNotificationPermission();
 
-        // ---- QUIZ: trigger (TEST: a "free moment" every 20 seconds while the app is open) ----
-        List<MomentDetector> detectors = new ArrayList<>();
-        detectors.add(new IntervalDetector(20_000));
-        List<MomentCondition> conditions = new ArrayList<>();   // none yet
-        QuizCoordinator quiz = QuizCoordinator.getInstance(this);
-        triggerManager = new TriggerManager(detectors, conditions, reason -> {
-            Log.d("TRIGGER", "Moment detected: " + reason);
-            quiz.onMomentDetected(reason);   // picks the next question and sends the notification
-        });
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        triggerManager.start(this);   // QUIZ: app visible, start looking for moments
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        triggerManager.stop();        // QUIZ: app hidden, stop (the test timer can't run in background)
+        // ---- QUIZ: start the background service that sends the questions ----
+        // It keeps running when the app is closed; stop it from its notification ("Stop").
+        QuizService.start(this);
     }
 
     /** Which fragment belongs to which tab. (if/else, because R.id values are not constants.) */

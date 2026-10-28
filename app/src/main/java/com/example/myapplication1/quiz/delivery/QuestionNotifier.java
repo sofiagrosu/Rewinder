@@ -87,6 +87,7 @@ public class QuestionNotifier {
                 .setContentTitle(title)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)   // full question on the lock screen
                 .setContentIntent(openAppIntent())   // tapping the text opens the app
                 .setAutoCancel(true);
     }

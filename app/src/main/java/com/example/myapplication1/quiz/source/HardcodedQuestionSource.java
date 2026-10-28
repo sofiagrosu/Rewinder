@@ -63,6 +63,57 @@ public class HardcodedQuestionSource implements QuestionSource {
                 "At rest, atrial contraction fills most of the ventricle.",
                 "True", "False", null, 2,
                 "Most filling (~70–80%) is passive; the atrial \"kick\" adds only ~20–30%."));
+
+        // ---- Subject 3: Databases · SQL basics ----
+        allQuestions.add(new Question(11, 3,
+                "Which SQL command reads data from a table?",
+                "SELECT", "INSERT", "UPDATE", 1,
+                "SELECT only reads rows; INSERT and UPDATE change the data."));
+
+        allQuestions.add(new Question(12, 3,
+                "Which clause keeps only the rows that match a condition?",
+                "ORDER BY", "GROUP BY", "WHERE", 3,
+                "Example: SELECT * FROM students WHERE age > 20;"));
+
+        allQuestions.add(new Question(13, 3,
+                "ORDER BY sorts the results in ascending order by default.",
+                "True", "False", null, 1,
+                "ASC is the default; write DESC for descending order."));
+
+        allQuestions.add(new Question(14, 3,
+                "Which keyword removes duplicate rows from a query result?",
+                "DISTINCT", "UNIQUE", "ONLY", 1,
+                "SELECT DISTINCT city FROM students; (UNIQUE is a constraint on a column)."));
+
+        allQuestions.add(new Question(15, 3,
+                "A PRIMARY KEY column can contain NULL values.",
+                "True", "False", null, 2,
+                "A primary key must be unique and NOT NULL."));
+
+        allQuestions.add(new Question(16, 3,
+                "Which function returns the number of rows?",
+                "SUM()", "COUNT()", "MAX()", 2,
+                "COUNT(*) counts rows; SUM() adds up the values of a column."));
+
+        allQuestions.add(new Question(17, 3,
+                "Which join returns only the rows that have a match in both tables?",
+                "INNER JOIN", "LEFT JOIN", "FULL JOIN", 1,
+                "LEFT JOIN also keeps the rows from the left table that have no match."));
+
+        allQuestions.add(new Question(18, 3,
+                "Which clause filters groups after GROUP BY?",
+                "WHERE", "HAVING", "LIMIT", 2,
+                "WHERE filters rows before grouping; HAVING filters the groups after."));
+
+        allQuestions.add(new Question(19, 3,
+                "DELETE FROM students; (without WHERE) deletes all rows of the table.",
+                "True", "False", null, 1,
+                "Without WHERE, every row is deleted. Always check the WHERE clause!"));
+
+        allQuestions.add(new Question(20, 3,
+                "Which command changes values in existing rows?",
+                "INSERT", "UPDATE", "ALTER", 2,
+                "ALTER changes the table structure (columns), not the data in it."));
     }
 
     @Override
