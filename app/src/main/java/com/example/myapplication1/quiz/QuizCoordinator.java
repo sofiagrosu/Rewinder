@@ -4,10 +4,12 @@ import android.content.Context;
 import android.util.Log;
 
 import com.example.myapplication1.data.AnswerRecord;
+import com.example.myapplication1.data.DailyStats;
 import com.example.myapplication1.data.ProgressStore;
 import com.example.myapplication1.data.Question;
 import com.example.myapplication1.data.QuestionRepository;
 import com.example.myapplication1.data.RepositoryProvider;
+import com.example.myapplication1.data.StatsProvider;
 import com.example.myapplication1.data.Subject;
 import com.example.myapplication1.quiz.delivery.QuestionNotifier;
 import com.example.myapplication1.quiz.ordering.ProgressUpdater;
@@ -116,7 +118,7 @@ public final class QuizCoordinator {
         updater.recordAnswer(question, correct, now);   // quiz ordering (Leitner)
         repository.saveAnswer(new AnswerRecord(          // shared history (Home, Stats)
                 question.getId(), question.getSubjectId(), now, chosenOption, correct));
-        notifier.showResult(question, getSubjectTitle(question.getSubjectId()), correct);
+        notifier.showResult(question, getSubjectTitle(question.getSubjectId()), correct, statsLine());
         Log.d(TAG, "Question " + questionId + ": " + (correct ? "correct" : "wrong"));
     }
 
@@ -139,6 +141,18 @@ public final class QuizCoordinator {
         notifier.showQuestion(question, getSubjectTitle(question.getSubjectId()), pendingReason,
                 true, PROTECTION_MILLIS - elapsed);
         Log.d(TAG, "Question " + questionId + " shown again (" + (elapsed / 1000) + " s after it appeared)");
+    }
+
+    /**
+     * "Today: 9 answered · 78% correct · 3-day streak", or null if no stats are registered.
+     * Called after saveAnswer, so the answer just given is included. The numbers come from
+     * whatever RewinderApp registered (today: the same StatsCalculator as Home).
+     */
+    private String statsLine() {
+        DailyStats stats = StatsProvider.today();
+        if (stats == null) return null;
+        return "Today: " + stats.questionsToday() + " answered · "
+                + stats.accuracyToday() + "% correct · " + stats.streakDays() + "-day streak";
     }
 
     private boolean hasProtectedPendingQuestion(long now) {

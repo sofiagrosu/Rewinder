@@ -3,6 +3,8 @@ package com.example.myapplication1;
 import android.app.Application;
 
 import com.example.myapplication1.data.RepositoryProvider;
+import com.example.myapplication1.data.StatsProvider;
+import com.example.myapplication1.stats.StatsCalculator;
 
 /**
  * Runs once, before anything else, every time Android starts the app process.
@@ -18,5 +20,8 @@ public class RewinderApp extends Application {
     public void onCreate() {
         super.onCreate();
         RepositoryProvider.init(this);
+        // The only place that connects features: quiz/ reads the stats through data/StatsProvider,
+        // without importing stats/. Swap the implementation here and nothing else changes.
+        StatsProvider.set(() -> new StatsCalculator(RepositoryProvider.get()));
     }
 }

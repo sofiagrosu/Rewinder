@@ -1,6 +1,7 @@
 package com.example.myapplication1.stats;
 
 import com.example.myapplication1.data.AnswerRecord;
+import com.example.myapplication1.data.DailyStats;
 import com.example.myapplication1.data.MomentFeedback;
 import com.example.myapplication1.data.QuestionRepository;
 import com.example.myapplication1.data.Subject;
@@ -21,7 +22,7 @@ import java.util.Set;
  * Turns the raw history (answers, feedback) from the repository into the numbers
  * shown on Home and Stats. No Android classes here, so it is easy to test.
  */
-public class StatsCalculator {
+public class StatsCalculator implements DailyStats {
 
     /** Numbers for one subject. accuracyPercent is 0 when answerCount is 0. */
     public static class SubjectStat {
