@@ -18,10 +18,15 @@ import androidx.fragment.app.Fragment;
 
 import com.example.myapplication1.home.HomeFragment;
 import com.example.myapplication1.quiz.QuizService;
+import com.example.myapplication1.quiz.settings.QuizSettings;
+import com.example.myapplication1.quiz.settings.QuizSettingsFragment;
 import com.example.myapplication1.quiz.delivery.QuizNotifications;
 import com.example.myapplication1.quiz.ui.QuestionBanner;
 import com.example.myapplication1.stats.StatsFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import java.util.List;
+import java.util.ArrayList;
 
 
 /**
@@ -38,12 +43,18 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
  */
 public class MainActivity extends AppCompatActivity {
 
-    // ---- QUIZ: asks the user for the notification permission and tells us the answer ----
+    // ---- QUIZ: asks the user for the permissions the quiz needs (notifications, step sensor) ----
     // Must be a field (registered before the activity starts), not created inside onCreate's code.
-    private final ActivityResultLauncher<String> notificationPermissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
-                String message = granted ? "Notifications allowed" : "Notifications denied";
-                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    private final ActivityResultLauncher<String[]> quizPermissionsLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), results -> {
+                if (Boolean.FALSE.equals(results.get(Manifest.permission.ACTIVITY_RECOGNITION))) {
+                    Toast.makeText(this, "Without physical activity access, Rewinder can't tell when you stop walking",
+                            Toast.LENGTH_LONG).show();
+                }
+                if (Boolean.FALSE.equals(results.get(Manifest.permission.POST_NOTIFICATIONS))) {
+                    Toast.makeText(this, "Notifications denied: questions can't be shown", Toast.LENGTH_LONG).show();
+                }
+                QuizService.restartDetectors(this);   // detectors that were missing a permission start now
             });
 
     // ---- QUIZ: the question waiting for an answer, as a banner above the tabs ----
@@ -88,11 +99,11 @@ public class MainActivity extends AppCompatActivity {
 
         // ---- QUIZ: notifications setup ----
         QuizNotifications.createChannel(this);
-        askForNotificationPermission();
 
         // ---- QUIZ: start the background service that sends the questions ----
         // It keeps running when the app is closed; stop it from its notification ("Stop").
         QuizService.start(this);
+        askForQuizPermissions();   // if something is granted now, the service restarts its detectors
     }
 
     // ---- QUIZ: the banner follows the quiz only while the app is on screen ----
@@ -117,23 +128,39 @@ public class MainActivity extends AppCompatActivity {
         } else if (menuItemId == R.id.nav_stats) {
             return new StatsFragment();
         } else if (menuItemId == R.id.nav_settings) {
-            return PlaceholderFragment.newInstance(getString(R.string.nav_settings));   // TODO SettingsFragment
+            // TEMPORARY quiz settings (quiet hours, calendar), until the team's SettingsFragment exists
+            return new QuizSettingsFragment();
         }
         return null;
     }
 
     /**
-     * QUIZ: shows the system dialog "Allow Rewinder to send you notifications?" if not allowed yet.
-     * The permission only exists since Android 13 (API 33); on older phones notifications
-     * are allowed by default, so there is nothing to ask.
+     * QUIZ: asks, in one dialog sequence, for the permissions that are still missing:
+     *   - POST_NOTIFICATIONS (Android 13+ only; before that, notifications are allowed by default)
+     *   - ACTIVITY_RECOGNITION (Android 10+), needed by the step sensor (BreakDetector)
+     *   - READ_CALENDAR, only if the calendar is turned on in the quiz settings
      */
-    private void askForNotificationPermission() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return;   // Android 12 or older
-
-        boolean alreadyGranted = ContextCompat.checkSelfPermission(
-                this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED;
-        if (!alreadyGranted) {
-            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+    private void askForQuizPermissions() {
+        List<String> missing = new ArrayList<>();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                && !isGranted(Manifest.permission.POST_NOTIFICATIONS)) {
+            missing.add(Manifest.permission.POST_NOTIFICATIONS);
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+                && !isGranted(Manifest.permission.ACTIVITY_RECOGNITION)) {
+            missing.add(Manifest.permission.ACTIVITY_RECOGNITION);
+        }
+        // only if the user turned the calendar on (Settings); off by default
+        if (new QuizSettings(this).isCalendarEnabled()
+                && !isGranted(Manifest.permission.READ_CALENDAR)) {
+            missing.add(Manifest.permission.READ_CALENDAR);
+        }
+        if (!missing.isEmpty()) {
+            quizPermissionsLauncher.launch(missing.toArray(new String[0]));
+        }
+    }
+
+    private boolean isGranted(String permission) {
+        return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED;
     }
 }

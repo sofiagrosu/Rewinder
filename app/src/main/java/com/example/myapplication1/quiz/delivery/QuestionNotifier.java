@@ -69,13 +69,21 @@ public class QuestionNotifier {
         notifySafely(builder);
     }
 
-    /** Replaces the question with the result; no buttons, does not ring again. */
-    public void showResult(Question question, String title, boolean correct) {
+    /**
+     * Replaces the question with the result; no buttons, does not ring again.
+     * Collapsed: just the ✓/✗ headline. Expanded (phone) / tapped (watch): headline,
+     * explanation and, last, the stats line (built by QuizCoordinator from StatsCalculator).
+     */
+    public void showResult(Question question, String title, boolean correct,
+                           String statsLine) {
         String headline = resultHeadline(question, correct);
         String body = headline;
         String explanation = question.getExplanation();
         if (explanation != null && !explanation.isEmpty()) {
             body = headline + "\n" + explanation;
+        }
+        if (statsLine != null && !statsLine.isEmpty()) {
+            body = body + "\n\n" + statsLine;   // e.g. "Today: 9 answered · 78% correct · 3-day streak"
         }
 
         NotificationCompat.Builder builder = baseBuilder(title)

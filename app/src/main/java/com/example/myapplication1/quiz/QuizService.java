@@ -19,10 +19,16 @@ import com.example.myapplication1.R;
 import com.example.myapplication1.quiz.delivery.QuizNotifications;
 import com.example.myapplication1.quiz.trigger.MomentCondition;
 import com.example.myapplication1.quiz.trigger.MomentDetector;
+import com.example.myapplication1.quiz.settings.QuizSettings;
 import com.example.myapplication1.quiz.trigger.TriggerManager;
-import com.example.myapplication1.quiz.trigger.detectors.IntervalDetector;
+import com.example.myapplication1.quiz.trigger.blocked.BlockedTimeSource;
+import com.example.myapplication1.quiz.trigger.blocked.CalendarBusySource;
+import com.example.myapplication1.quiz.trigger.blocked.QuietHoursSource;
+import com.example.myapplication1.quiz.trigger.conditions.BlockedTimesCondition;
+import com.example.myapplication1.quiz.trigger.detectors.BreakDetector;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -39,6 +45,7 @@ public class QuizService extends Service {
 
     private static final String TAG = "QUIZ";
     private static final String ACTION_STOP = "com.example.myapplication1.quiz.STOP_SERVICE";
+    private static final String ACTION_RESTART_DETECTORS = "com.example.myapplication1.quiz.RESTART_DETECTORS";
     private static final int SERVICE_NOTIFICATION_ID = 1000;
 
     // TEST: the screen-off "deep sleep" pauses normal timers, so we keep the CPU awake.
@@ -55,6 +62,15 @@ public class QuizService extends Service {
         ContextCompat.startForegroundService(context, intent);
     }
 
+    /**
+     * Restarts the detectors, e.g. after the user granted a permission they need
+     * (a detector that was missing its permission did not start the first time).
+     */
+    public static void restartDetectors(Context context) {
+        Intent intent = new Intent(context, QuizService.class).setAction(ACTION_RESTART_DETECTORS);
+        ContextCompat.startForegroundService(context, intent);
+    }
+
     public static void stop(Context context) {
         context.stopService(new Intent(context, QuizService.class));
     }
@@ -67,8 +83,15 @@ public class QuizService extends Service {
         QuizNotifications.createChannel(this);
 
         List<MomentDetector> detectors = new ArrayList<>();
-        detectors.add(new IntervalDetector(20_000));            // TEST: a "free moment" every 20 s
-        List<MomentCondition> conditions = new ArrayList<>();   // none yet
+        detectors.add(new BreakDetector());   // not walking → sets of questions (see TriggerConfig)
+        // TEST alternative: detectors.add(new IntervalDetector(20_000));   // a "moment" every 20 s
+        // no question during quiet hours (default 22-08) or busy calendar events (if turned on)
+        QuizSettings settings = new QuizSettings(this);
+        List<BlockedTimeSource> blockedSources = Arrays.asList(
+                new QuietHoursSource(settings),
+                new CalendarBusySource(this, settings));
+        List<MomentCondition> conditions = new ArrayList<>();
+        conditions.add(new BlockedTimesCondition(blockedSources));
         QuizCoordinator quiz = QuizCoordinator.getInstance(this);
         triggerManager = new TriggerManager(detectors, conditions, reason -> {
             Log.d("TRIGGER", "Moment detected: " + reason);
@@ -86,6 +109,10 @@ public class QuizService extends Service {
 
         goForeground();
         acquireWakeLock();
+        if (intent != null && ACTION_RESTART_DETECTORS.equals(intent.getAction())) {
+            triggerManager.stop();
+            Log.d(TAG, "Restarting detectors");
+        }
         triggerManager.start(this);   // safe to call again: it ignores a second start
         Log.d(TAG, "Service running");
         return START_STICKY;          // if Android kills it, restart it when possible
@@ -130,7 +157,7 @@ public class QuizService extends Service {
                 .setSmallIcon(R.drawable.ic_notification)
                 .setColor(ContextCompat.getColor(this, R.color.primary))
                 .setContentTitle("Rewinder is looking for free moments")
-                .setContentText("Test mode: a question every 20 seconds")
+                .setContentText("Questions come while you take a break from walking")
                 .setOngoing(true)
                 .setSilent(true)
                 .setLocalOnly(true)   // phone only: don't bridge this to the Wear OS watch

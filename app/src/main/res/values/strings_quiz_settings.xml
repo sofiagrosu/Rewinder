@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Texts of the TEMPORARY quiz settings screen (QuizSettingsFragment).
+    Separate file so it does not collide with teammates' string files.
+-->
+<resources>
+    <string name="qs_title">Settings</string>
+    <string name="qs_subtitle">Temporary screen for testing the quiz</string>
+
+    <string name="qs_quiet_title">Quiet hours</string>
+    <string name="qs_quiet_description">No questions during these hours, e.g. while you sleep.</string>
+    <string name="qs_from">From %1$s</string>
+    <string name="qs_to">To %1$s</string>
+
+    <string name="qs_calendar_title">Busy in my calendar</string>
+    <string name="qs_calendar_description">No questions during events marked \"Busy\" (all-day events are ignored).</string>
+    <string name="qs_calendar_pick">Calendars to use:</string>
+    <string name="qs_calendar_none">No calendars found on this phone.</string>
+    <string name="qs_calendar_denied">Without calendar access this option can\'t work.</string>
+    <string name="qs_calendar_keep_one">Keep at least one calendar selected.</string>
+
+    <string name="qs_status_title">Right now</string>
+    <string name="qs_status_allowed">Questions are allowed.</string>
+    <string name="qs_status_blocked">Blocked: %1$s, until %2$s.</string>
+</resources>
