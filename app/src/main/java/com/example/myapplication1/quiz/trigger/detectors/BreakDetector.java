@@ -30,9 +30,11 @@ import java.util.ArrayDeque;
  * The app starts in "not walking" too, so sitting with the phone also starts a break
  * after STOPPED_FOR_MILLIS without steps.
  *
- * During a break, moments come in sets:
- *   QUESTIONS_PER_SET moments, QUESTION_SPACING_MILLIS apart,
- *   then a pause of PAUSE_BETWEEN_SETS_MILLIS, then the next set... until the user walks again.
+ * During a break, questions come in sets of QUESTIONS_PER_SET. The spacing is counted from the
+ * ANSWER, not from the notification: the next question comes QUESTION_SPACING_MILLIS after the
+ * previous one was answered, and the next set PAUSE_BETWEEN_SETS_MILLIS after the last question of
+ * the set was answered. While a question waits for an answer, nothing new is sent.
+ * Only questions really sent count (a blocked moment is retried after RETRY_AFTER_NOT_SENT_MILLIS).
  * "Walking again" = MIN_STEPS_TO_COUNT_AS_WALKING steps within WALKING_WINDOW_MILLIS;
  * a few single steps (shifting feet at the bus stop) don't end the break.
  * All numbers: see TriggerConfig.
@@ -54,8 +56,9 @@ public class BreakDetector implements MomentDetector, SensorEventListener {
     private boolean walking = false;       // walked enough recently
     private boolean cameFromWalking = false;
     private boolean inBreak = false;
-    private int questionsInSet = 0;        // moments already sent in the current set
+    private int questionsInSet = 0;        // questions really sent in the current set
     private long nextMomentAt = 0;         // during a break: when the next moment is due
+    private boolean waitingForAnswer = false;   // a question was sent and is not answered yet
 
     private final Runnable tick = new Runnable() {
         @Override
@@ -116,19 +119,37 @@ public class BreakDetector implements MomentDetector, SensorEventListener {
             }
         }
 
+        if (waitingForAnswer) return;          // the next question comes after the answer
         if (now < nextMomentAt) return;
 
         if (questionsInSet == TriggerConfig.QUESTIONS_PER_SET) {
             questionsInSet = 0;   // the pause is over: a new set starts
         }
+        boolean sent = listener.onMomentDetected(reasonFor(questionsInSet + 1));
+        if (!sent) {
+            // blocked (quiet hours, calendar...) or nothing to ask: try again a bit later
+            nextMomentAt = now + TriggerConfig.RETRY_AFTER_NOT_SENT_MILLIS;
+            return;
+        }
         questionsInSet++;
-        listener.onMomentDetected(reasonFor(questionsInSet));
-        Log.d(TAG, "Break: question " + questionsInSet + " of " + TriggerConfig.QUESTIONS_PER_SET);
-
-        nextMomentAt = now + (questionsInSet < TriggerConfig.QUESTIONS_PER_SET
-                ? TriggerConfig.QUESTION_SPACING_MILLIS
-                : TriggerConfig.PAUSE_BETWEEN_SETS_MILLIS);
+        waitingForAnswer = true;
         cameFromWalking = false;   // only the very first question says "you stopped walking"
+        Log.d(TAG, "Break: question " + questionsInSet + " of " + TriggerConfig.QUESTIONS_PER_SET
+                + " sent, waiting for the answer");
+    }
+
+    /** The question sent last was answered: the spacing starts now. */
+    @Override
+    public void onQuestionAnswered() {
+        if (!waitingForAnswer) return;
+        waitingForAnswer = false;
+        long now = SystemClock.elapsedRealtime();
+        boolean setFinished = questionsInSet >= TriggerConfig.QUESTIONS_PER_SET;
+        nextMomentAt = now + (setFinished
+                ? TriggerConfig.PAUSE_BETWEEN_SETS_MILLIS
+                : TriggerConfig.QUESTION_SPACING_MILLIS);
+        Log.d(TAG, "Answered: next " + (setFinished ? "set" : "question") + " in "
+                + ((nextMomentAt - now) / 1000) + " s (if still on a break)");
     }
 
     /** One call per step. */
@@ -172,6 +193,7 @@ public class BreakDetector implements MomentDetector, SensorEventListener {
         inBreak = false;
         questionsInSet = 0;
         nextMomentAt = 0;
+        waitingForAnswer = false;
     }
 
     private String reasonFor(int questionNumber) {

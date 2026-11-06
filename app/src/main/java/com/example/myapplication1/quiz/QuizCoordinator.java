@@ -15,7 +15,9 @@ import com.example.myapplication1.quiz.delivery.QuestionNotifier;
 import com.example.myapplication1.quiz.ordering.ProgressUpdater;
 import com.example.myapplication1.quiz.ordering.QuestionPicker;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The "conductor": the only class that knows all four quiz parts.
@@ -30,16 +32,14 @@ import java.util.List;
  *     (RepositoryProvider.get()), the same data Home and Stats use;
  *   - every answer is saved there as an AnswerRecord, so it shows up in Home and Stats;
  *   - the Leitner/ordering progress is saved in the same database (RepositoryProvider.getProgressStore()).
+ *
+ * A sent question stays "pending" until it is answered (no time limit): while it is pending no
+ * other question is sent, and if its notification is swiped away it comes back.
+ * Besides notifications, the user can answer a practice set inside the app (PracticeActivity).
  */
 public final class QuizCoordinator {
 
     private static final String TAG = "QUIZ";
-
-    /**
-     * For this long after a question appears: no new question replaces it,
-     * and if it is swiped away it comes back (silently). After that it disappears by itself.
-     */
-    public static final long PROTECTION_MILLIS = 3 * 60_000;   // 3 minutes
 
     private static QuizCoordinator instance;
 
@@ -60,6 +60,12 @@ public final class QuizCoordinator {
     }
     private PendingListener pendingListener;   // at most one; null while the app is not on screen
 
+    /** Whoever needs to know that the pending question was answered (QuizService → BreakDetector). */
+    public interface AnswerListener {
+        void onPendingQuestionAnswered();
+    }
+    private final List<AnswerListener> answerListeners = new ArrayList<>();
+
     public static synchronized QuizCoordinator getInstance(Context context) {
         if (instance == null) {
             instance = new QuizCoordinator(context.getApplicationContext());
@@ -77,12 +83,15 @@ public final class QuizCoordinator {
         notifier = new QuestionNotifier(appContext);
     }
 
-    /** Called by the trigger: pick the next question and send it. */
-    public void onMomentDetected(String reason) {
+    /**
+     * Called by the trigger: pick the next question and send it.
+     * @return true if a question was sent (false: one is still waiting for an answer, or none available)
+     */
+    public boolean onMomentDetected(String reason) {
         long now = System.currentTimeMillis();
-        if (hasProtectedPendingQuestion(now)) {
+        if (hasPendingQuestion()) {
             Log.d(TAG, "Question " + pendingQuestionId + " still waiting for an answer, not sending a new one");
-            return;
+            return false;
         }
 
         List<Question> candidates = repository.getAllQuestions();   // all subjects
@@ -90,57 +99,95 @@ public final class QuizCoordinator {
         Question question = picker.pickNext(candidates, now);
         if (question == null) {
             Log.d(TAG, "No question to send");
-            return;
+            return false;
         }
-        notifier.showQuestion(question, getSubjectTitle(question.getSubjectId()), reason,
-                false, PROTECTION_MILLIS);
+        notifier.showQuestion(question, getSubjectTitle(question.getSubjectId()), reason, false);
         updater.recordShown(question.getId(), now);
         pendingQuestionId = question.getId();
         pendingShownAt = now;
         pendingReason = reason;
         notifyPendingChanged();
         Log.d(TAG, "Sent question " + question.getId() + " (" + reason + ")");
+        return true;
     }
 
-    /** Called by AnswerReceiver when the user taps an option. */
+    /** Called by AnswerReceiver (notification / watch) and the in-app banner. Shows the result notification. */
     public void onAnswer(long questionId, int chosenOption) {
+        answer(questionId, chosenOption, true);
+    }
+
+    /**
+     * Called by PracticeActivity: the result is shown in the app, so no result notification.
+     * If it was the pending question, its notification is removed.
+     */
+    public void onAnswerInApp(long questionId, int chosenOption) {
+        answer(questionId, chosenOption, false);
+    }
+
+    private void answer(long questionId, int chosenOption, boolean showResultNotification) {
         Question question = repository.getQuestion(questionId);
         if (question == null) {
             Log.w(TAG, "Unknown question " + questionId);
             return;
         }
-        if (questionId == pendingQuestionId) {
-            pendingQuestionId = -1;   // answered: a new question may come at the next moment
-            notifyPendingChanged();
-        }
+        boolean wasPending = questionId == pendingQuestionId;
         boolean correct = question.isCorrect(chosenOption);
         long now = System.currentTimeMillis();
         updater.recordAnswer(question, correct, now);   // quiz ordering (Leitner)
         repository.saveAnswer(new AnswerRecord(          // shared history (Home, Stats)
                 question.getId(), question.getSubjectId(), now, chosenOption, correct));
-        notifier.showResult(question, getSubjectTitle(question.getSubjectId()), correct, statsLine());
-        Log.d(TAG, "Question " + questionId + ": " + (correct ? "correct" : "wrong"));
+
+        if (showResultNotification) {
+            notifier.showResult(question, getSubjectTitle(question.getSubjectId()), correct, statsLine());
+        } else if (wasPending) {
+            notifier.cancel();                          // answered in the app: remove the question
+        }
+        if (wasPending) {
+            pendingQuestionId = -1;                     // a new question may come at the next moment
+            notifyPendingChanged();
+            for (AnswerListener listener : new ArrayList<>(answerListeners)) {
+                listener.onPendingQuestionAnswered();   // e.g. BreakDetector: spacing starts now
+            }
+        }
+        Log.d(TAG, "Question " + questionId + ": " + (correct ? "correct" : "wrong")
+                + (showResultNotification ? "" : " (in app)"));
     }
 
     /**
      * Called by AnswerReceiver when the user swipes the question away.
-     * Within the protection time it comes back silently, for the remaining time only.
+     * A pending question always comes back (silently) until it is answered.
      */
     public void onDismissed(long questionId) {
         if (questionId != pendingQuestionId) return;   // an old question, nothing to do
-
-        long now = System.currentTimeMillis();
-        long elapsed = now - pendingShownAt;
-        if (elapsed >= PROTECTION_MILLIS) {
-            pendingQuestionId = -1;                    // protection over: let it go
-            notifyPendingChanged();
-            return;
-        }
         Question question = repository.getQuestion(questionId);
         if (question == null) return;
-        notifier.showQuestion(question, getSubjectTitle(question.getSubjectId()), pendingReason,
-                true, PROTECTION_MILLIS - elapsed);
-        Log.d(TAG, "Question " + questionId + " shown again (" + (elapsed / 1000) + " s after it appeared)");
+        notifier.showQuestion(question, getSubjectTitle(question.getSubjectId()), pendingReason, true);
+        Log.d(TAG, "Question " + questionId + " shown again after a swipe");
+    }
+
+    // ---------------------------------------------------------------- practice set (in the app)
+
+    /**
+     * The next question of an in-app practice set. The pending question (if any, and not asked
+     * yet in this set) comes first; then the normal ordering picks among the others.
+     * @param alreadyAsked ids already shown in this practice set
+     * @return the question, or null if there is nothing left to ask
+     */
+    public Question nextPracticeQuestion(Set<Long> alreadyAsked) {
+        if (hasPendingQuestion() && !alreadyAsked.contains(pendingQuestionId)) {
+            Question pending = repository.getQuestion(pendingQuestionId);
+            if (pending != null) return pending;
+        }
+        List<Question> candidates = new ArrayList<>();
+        for (Question q : repository.getAllQuestions()) {
+            if (!alreadyAsked.contains(q.getId()) && q.getId() != pendingQuestionId) candidates.add(q);
+        }
+        long now = System.currentTimeMillis();
+        Question question = picker.pickNext(candidates, now);
+        if (question != null && question.getId() != pendingQuestionId) {
+            updater.recordShown(question.getId(), now);   // it goes "to the end of the queue" too
+        }
+        return question;
     }
 
     /**
@@ -148,22 +195,22 @@ public final class QuizCoordinator {
      * Called after saveAnswer, so the answer just given is included. The numbers come from
      * whatever RewinderApp registered (today: the same StatsCalculator as Home).
      */
-    private String statsLine() {
+    public String statsLine() {
         DailyStats stats = StatsProvider.today();
         if (stats == null) return null;
         return "Today: " + stats.questionsToday() + " answered · "
                 + stats.accuracyToday() + "% correct · " + stats.streakDays() + "-day streak";
     }
 
-    private boolean hasProtectedPendingQuestion(long now) {
-        return pendingQuestionId >= 0 && now - pendingShownAt < PROTECTION_MILLIS;
+    private boolean hasPendingQuestion() {
+        return pendingQuestionId >= 0;
     }
 
     // ---- read by the in-app banner (display only) ----
 
-    /** The question still waiting for an answer (within its protection time), or null. */
+    /** The question still waiting for an answer, or null. */
     public Question getPendingQuestion() {
-        if (!hasProtectedPendingQuestion(System.currentTimeMillis())) return null;
+        if (!hasPendingQuestion()) return null;
         return repository.getQuestion(pendingQuestionId);
     }
 
@@ -172,14 +219,16 @@ public final class QuizCoordinator {
         return pendingReason;
     }
 
-    /** How long the pending question still stays on screen, in ms (0 if none). */
-    public long getPendingRemainingMillis() {
-        long remaining = PROTECTION_MILLIS - (System.currentTimeMillis() - pendingShownAt);
-        return pendingQuestionId >= 0 && remaining > 0 ? remaining : 0;
-    }
-
     public void setPendingListener(PendingListener listener) {
         pendingListener = listener;
+    }
+
+    public synchronized void addAnswerListener(AnswerListener listener) {
+        answerListeners.add(listener);
+    }
+
+    public synchronized void removeAnswerListener(AnswerListener listener) {
+        answerListeners.remove(listener);
     }
 
     private void notifyPendingChanged() {

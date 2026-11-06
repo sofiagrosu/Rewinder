@@ -14,4 +14,11 @@ public interface MomentDetector {
 
     /** Stop watching and release everything (timers, sensors). Safe to call twice. */
     void stop();
+
+    /**
+     * The question sent for the last moment was answered (now).
+     * Optional: detectors that space questions "after the answer" (BreakDetector) override it.
+     */
+    default void onQuestionAnswered() {
+    }
 }

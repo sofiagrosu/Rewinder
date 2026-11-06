@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- QUIZ: texts of the in-app practice set (PracticeActivity) and of its button on Home -->
+<resources>
+    <string name="practice_button">Practice now · 3 questions</string>
+    <string name="practice_title">Practice</string>
+    <string name="practice_progress">Question %1$d of %2$d</string>
+    <string name="practice_next">Next question</string>
+    <string name="practice_finish">See results</string>
+    <string name="practice_done_title">Set complete</string>
+    <string name="practice_done_score">%1$d of %2$d correct</string>
+    <string name="practice_close">Close</string>
+    <string name="practice_nothing">There are no questions to practice right now.</string>
+</resources>

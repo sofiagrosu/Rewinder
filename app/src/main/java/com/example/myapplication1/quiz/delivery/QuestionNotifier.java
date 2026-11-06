@@ -47,18 +47,17 @@ public class QuestionNotifier {
 
     /**
      * Shows the question with its answer buttons.
-     * @param silent        true when re-showing after an accidental swipe (no sound, no pop-up)
-     * @param timeoutMillis the notification disappears by itself after this time if unanswered
+     * It stays until the question is answered: no timeout, and if it is swiped away
+     * QuizCoordinator.onDismissed shows it again.
+     * @param silent true when re-showing after a swipe (no sound, no pop-up)
      */
-    public void showQuestion(Question question, String title, String reason,
-                             boolean silent, long timeoutMillis) {
+    public void showQuestion(Question question, String title, String reason, boolean silent) {
         NotificationCompat.Builder builder = baseBuilder(title)
                 .setContentText(question.getText())
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(question.getText()))
                 .setSubText(reason)                          // "why now", shown in the header
                 .setAutoCancel(false)                        // tapping the text opens the app, question stays
                 .setSilent(silent)
-                .setTimeoutAfter(timeoutMillis)
                 .setDeleteIntent(dismissIntent(question.getId()));   // told when the user swipes it away
 
         for (int n = 1; n <= question.getOptionCount(); n++) {
@@ -67,6 +66,11 @@ public class QuestionNotifier {
                     answerIntent(question.getId(), n));
         }
         notifySafely(builder);
+    }
+
+    /** Removes the quiz notification (e.g. the question was answered inside the app). */
+    public void cancel() {
+        NotificationManagerCompat.from(context).cancel(QUESTION_NOTIFICATION_ID);
     }
 
     /**

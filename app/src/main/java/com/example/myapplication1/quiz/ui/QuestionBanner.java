@@ -21,8 +21,8 @@ import java.util.Locale;
  * with its option buttons, and afterwards the result (✓ / ✗ + explanation + OK).
  *
  * It is shown whenever a question is pending — so also when the app is opened by tapping
- * the notification — and hides when the question is answered (here, from the notification
- * or from the watch) or when its protection time runs out.
+ * the notification — and hides when the question is answered (here, from the notification,
+ * from the watch or in a practice set).
  *
  * Display only: an answer given here goes through QuizCoordinator.onAnswer, exactly like a
  * notification button, so the progress, the history and the result notification are the same.
@@ -110,15 +110,12 @@ public final class QuestionBanner implements QuizCoordinator.PendingListener {
         optionsRow.setVisibility(View.VISIBLE);
         okButton.setVisibility(View.GONE);
         card.setVisibility(View.VISIBLE);
-        // hides by itself when the protection time is over (the moment the notification disappears)
-        handler.removeCallbacks(expiryCheck);
-        handler.postDelayed(expiryCheck, coordinator.getPendingRemainingMillis() + 100);
     }
 
     private void answer(int option) {
         Question question = coordinator.getPendingQuestion();
         if (question == null || question.getId() != shownQuestionId) {
-            hide();                                // expired or already answered elsewhere
+            hide();                                // already answered elsewhere
             return;
         }
         boolean correct = question.isCorrect(option);

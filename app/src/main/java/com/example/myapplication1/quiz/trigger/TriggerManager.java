@@ -43,12 +43,23 @@ public class TriggerManager {
         }
     }
 
-    /** Called by any detector. Passes the moment on only if every condition agrees. */
-    private void onDetectorSignal(String reason) {
+    /** Tells every detector that the pending question was answered (see BreakDetector). */
+    public void onQuestionAnswered() {
+        if (!running) return;
+        for (MomentDetector detector : detectors) {
+            detector.onQuestionAnswered();
+        }
+    }
+
+    /**
+     * Called by any detector. Passes the moment on only if every condition agrees.
+     * @return true if a question was really sent
+     */
+    private boolean onDetectorSignal(String reason) {
         long now = System.currentTimeMillis();
         for (MomentCondition condition : conditions) {
-            if (!condition.allowsNow(context, now)) return;   // vetoed
+            if (!condition.allowsNow(context, now)) return false;   // vetoed
         }
-        listener.onMomentDetected(reason);
+        return listener.onMomentDetected(reason);
     }
 }

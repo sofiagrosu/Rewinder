@@ -53,6 +53,10 @@ public class QuizService extends Service {
     private static final long WAKE_LOCK_MAX_MILLIS = 2 * 60 * 60 * 1000L;   // safety limit: 2 hours
 
     private TriggerManager triggerManager;
+    // told by the coordinator when the pending question is answered (spacing counts from the answer)
+    private final android.os.Handler mainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private final QuizCoordinator.AnswerListener answerListener =
+            () -> mainHandler.post(() -> triggerManager.onQuestionAnswered());
     private PowerManager.WakeLock wakeLock;
 
     // ---------------------------------------------------------------- start / stop helpers
@@ -95,8 +99,9 @@ public class QuizService extends Service {
         QuizCoordinator quiz = QuizCoordinator.getInstance(this);
         triggerManager = new TriggerManager(detectors, conditions, reason -> {
             Log.d("TRIGGER", "Moment detected: " + reason);
-            quiz.onMomentDetected(reason);
+            return quiz.onMomentDetected(reason);   // true = a question was sent
         });
+        quiz.addAnswerListener(answerListener);
     }
 
     @Override
@@ -120,6 +125,7 @@ public class QuizService extends Service {
 
     @Override
     public void onDestroy() {
+        QuizCoordinator.getInstance(this).removeAnswerListener(answerListener);
         triggerManager.stop();
         releaseWakeLock();
         Log.d(TAG, "Service destroyed");
