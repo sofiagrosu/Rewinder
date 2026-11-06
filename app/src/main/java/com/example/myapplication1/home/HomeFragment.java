@@ -12,9 +12,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.myapplication1.MainActivity;
 import com.example.myapplication1.R;
 import com.example.myapplication1.data.RepositoryProvider;
 import com.example.myapplication1.stats.StatsCalculator;
+import com.example.myapplication1.upload.UploadMaterialFragment;
 import com.example.myapplication1.util.RoPlural;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
@@ -23,13 +25,13 @@ import java.time.LocalTime;
 import java.util.List;
 
 /**
- * Home ("Acasă"). XML (fragment_home.xml) says HOW it looks;
+ * Home. XML (fragment_home.xml) says HOW it looks;
  * this class says WHAT data appears and WHAT happens on taps.
  * All numbers come from the repository through StatsCalculator.
  */
 public class HomeFragment extends Fragment {
 
-    // TODO: will come from Settings ("Limită zilnică") when that screen exists.
+    // TODO: will come from Settings ("Daily limit") when that screen exists.
     private static final int DAILY_GOAL = 20;
     private static final int ACTIVE_SUBJECTS_SHOWN = 2;
 
@@ -64,7 +66,7 @@ public class HomeFragment extends Fragment {
         btnWhyNow.setOnClickListener(v ->
                 Toast.makeText(requireContext(), R.string.toast_why_now, Toast.LENGTH_SHORT).show());
         btnUpload.setOnClickListener(v ->
-                Toast.makeText(requireContext(), R.string.toast_upload, Toast.LENGTH_SHORT).show());
+                ((MainActivity) requireActivity()).openScreen(new UploadMaterialFragment()));
     }
 
     /** Refresh every time the screen comes back, so answers given meanwhile show up. */
