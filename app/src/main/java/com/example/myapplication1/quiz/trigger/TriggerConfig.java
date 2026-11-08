@@ -46,6 +46,25 @@ public final class TriggerConfig {
     public static final int DEFAULT_QUIET_START_HOUR = 22;   // 22:00
     public static final int DEFAULT_QUIET_END_HOUR = 8;      // 08:00 (next morning)
 
+    /** Daily goal (questions answered per day), changed by the user in Settings. */
+    public static final int DEFAULT_DAILY_GOAL = 20;
+    public static final int MIN_DAILY_GOAL = 5;
+    public static final int MAX_DAILY_GOAL = 100;
+    public static final int DAILY_GOAL_STEP = 5;
+
     /** Calendar is OFF by default: the user turns it on (and gives the permission) in Settings. */
-    public static final boolean DEFAULT_CALENDAR_ENABLED = true;
+    public static final boolean DEFAULT_CALENDAR_ENABLED = false;
+
+    // ------------------------------------------------------------------
+    // QuizService: keeping the monitoring alive (wake lock) and pausing it
+    // ------------------------------------------------------------------
+
+    /** While monitoring is active, the service re-checks the blocked times this often. */
+    public static final long EVALUATE_INTERVAL_MILLIS = 60_000;       // 1 minute
+
+    /**
+     * The wake lock is renewed at every check, so it never runs out while the service works.
+     * If the service freezes, the lock still expires by itself after this time.
+     */
+    public static final long WAKE_LOCK_TIMEOUT_MILLIS = 5 * 60_000;   // 5 minutes
 }

@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 
 import com.example.myapplication1.data.AnswerRecord;
+import com.example.myapplication1.data.IgnoredRecord;
 import com.example.myapplication1.data.MomentFeedback;
 import com.example.myapplication1.data.Question;
 import com.example.myapplication1.data.QuestionProgress;
@@ -27,6 +28,7 @@ final class Rows {
     static final String ANSWERS = "answers";
     static final String FEEDBACK = "moment_feedback";
     static final String PROGRESS = "question_progress";
+    static final String IGNORED = "ignored_questions";
 
     // ---------------------------------------------------------------- Subject
 
@@ -95,6 +97,23 @@ final class Rows {
                 c.getLong(c.getColumnIndexOrThrow("timestamp")),
                 c.getInt(c.getColumnIndexOrThrow("chosen_option")),
                 c.getInt(c.getColumnIndexOrThrow("correct")) == 1);
+    }
+
+    // ---------------------------------------------------------------- IgnoredRecord
+
+    static ContentValues values(IgnoredRecord r) {
+        ContentValues cv = new ContentValues();
+        cv.put("question_id", r.getQuestionId());
+        cv.put("subject_id", r.getSubjectId());
+        cv.put("timestamp", r.getTimestampMillis());
+        return cv;
+    }
+
+    static IgnoredRecord ignored(Cursor c) {
+        return new IgnoredRecord(
+                c.getLong(c.getColumnIndexOrThrow("question_id")),
+                c.getLong(c.getColumnIndexOrThrow("subject_id")),
+                c.getLong(c.getColumnIndexOrThrow("timestamp")));
     }
 
     // ---------------------------------------------------------------- MomentFeedback

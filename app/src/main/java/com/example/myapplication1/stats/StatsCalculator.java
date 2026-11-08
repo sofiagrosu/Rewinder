@@ -92,6 +92,49 @@ public class StatsCalculator implements DailyStats {
         return accuracyOf(answersFrom(today.minusDays(days - 1)));
     }
 
+    // ------------------------------------------------------------------ ignored / response rate
+    // Ignored questions are NOT wrong answers: they never enter accuracyOf(), which only
+    // looks at AnswerRecord. They only appear in the two numbers below.
+
+    /** Questions sent today that nobody answered. */
+    public int ignoredToday() {
+        return repo.getIgnoredSince(startOf(today)).size();
+    }
+
+    /** Questions that were sent but not answered in the last {@code days} days, today included. */
+    public int ignoredLastDays(int days) {
+        return repo.getIgnoredSince(startOf(today.minusDays(days - 1))).size();
+    }
+
+    /** Questions answered in the last {@code days} days, today included. */
+    public int answeredLastDays(int days) {
+        return answersFrom(today.minusDays(days - 1)).size();
+    }
+
+    /** Correct answers in the last {@code days} days, today included. */
+    public int correctLastDays(int days) {
+        int correct = 0;
+        for (AnswerRecord a : answersFrom(today.minusDays(days - 1))) {
+            if (a.isCorrect()) correct++;
+        }
+        return correct;
+    }
+
+    /** Wrong answers in the last {@code days} days (ignored questions are NOT counted here). */
+    public int wrongLastDays(int days) {
+        return answeredLastDays(days) - correctLastDays(days);
+    }
+
+    /**
+     * Answered / (answered + ignored) in the last {@code days} days, in percent;
+     * -1 if no question was sent in that period.
+     */
+    public int responseRateLastDays(int days) {
+        int answered = answeredLastDays(days);
+        int total = answered + ignoredLastDays(days);
+        return total == 0 ? -1 : percent(answered, total);
+    }
+
     /** Percent of "good moment" answers in the last {@code days} days; -1 if there is no feedback. */
     public int goodMomentsPercent(int days) {
         long since = startOf(today.minusDays(days - 1));

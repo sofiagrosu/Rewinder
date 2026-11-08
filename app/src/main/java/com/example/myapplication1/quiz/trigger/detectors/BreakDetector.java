@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat;
 import com.example.myapplication1.quiz.trigger.MomentDetector;
 import com.example.myapplication1.quiz.trigger.MomentListener;
 import com.example.myapplication1.quiz.trigger.TriggerConfig;
+import com.example.myapplication1.quiz.trigger.TriggerStatus;
 
 import java.util.ArrayDeque;
 
@@ -74,6 +75,7 @@ public class BreakDetector implements MomentDetector, SensorEventListener {
 
         if (!hasActivityPermission(context)) {
             Log.w(TAG, "BreakDetector: ACTIVITY_RECOGNITION permission missing, not started");
+            TriggerStatus.motion = TriggerStatus.Motion.UNKNOWN;
             return;
         }
         sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
@@ -81,6 +83,7 @@ public class BreakDetector implements MomentDetector, SensorEventListener {
         if (stepDetector == null) {
             Log.w(TAG, "BreakDetector: this phone has no step detector sensor, not started");
             sensorManager = null;
+            TriggerStatus.motion = TriggerStatus.Motion.UNKNOWN;
             return;
         }
         sensorManager.registerListener(this, stepDetector, SensorManager.SENSOR_DELAY_NORMAL);
@@ -97,6 +100,7 @@ public class BreakDetector implements MomentDetector, SensorEventListener {
         }
         handler.removeCallbacks(tick);
         resetToNotWalking();
+        TriggerStatus.motion = TriggerStatus.Motion.UNKNOWN;
     }
 
     // ---------------------------------------------------------------- the state machine
@@ -110,6 +114,8 @@ public class BreakDetector implements MomentDetector, SensorEventListener {
                 recentSteps.clear();
                 questionsInSet = 0;
                 nextMomentAt = now;   // first question of the first set: right now
+                TriggerStatus.motion = TriggerStatus.Motion.BREAK;
+                TriggerStatus.breakStartedAt = now;
                 Log.d(TAG, "Break started (" + (cameFromWalking ? "stopped walking" : "not walking") + ")");
             } else {
                 return;
@@ -122,6 +128,7 @@ public class BreakDetector implements MomentDetector, SensorEventListener {
             questionsInSet = 0;   // the pause is over: a new set starts
         }
         questionsInSet++;
+        TriggerStatus.questionsInSet = questionsInSet;   // read by the coordinator (first of the set?)
         listener.onMomentDetected(reasonFor(questionsInSet));
         Log.d(TAG, "Break: question " + questionsInSet + " of " + TriggerConfig.QUESTIONS_PER_SET);
 
@@ -152,14 +159,27 @@ public class BreakDetector implements MomentDetector, SensorEventListener {
             walking = true;
             cameFromWalking = true;
             inBreak = false;
+            TriggerStatus.motion = TriggerStatus.Motion.WALKING;
+            TriggerStatus.breakStartedAt = 0;
             lastStepAt = stepAt;
             Log.d(TAG, "Walking detected (" + recentSteps.size() + " steps), break over");
+            listener.onWalkingStarted();   // a question still on screen (also on the watch) is withdrawn
         }
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         // not needed for steps
+    }
+
+    /** "Bad moment" answered Yes: skip the rest of this set, the next one comes after the long pause. */
+    @Override
+    public void postponeCycle() {
+        if (!inBreak) return;
+        questionsInSet = TriggerConfig.QUESTIONS_PER_SET;   // the set counts as finished
+        nextMomentAt = SystemClock.elapsedRealtime() + TriggerConfig.PAUSE_BETWEEN_SETS_MILLIS;
+        Log.d(TAG, "Bad moment: the rest of the set is skipped, trying again in "
+                + TriggerConfig.PAUSE_BETWEEN_SETS_MILLIS / 60_000 + " min");
     }
 
     // ---------------------------------------------------------------- helpers
@@ -172,6 +192,9 @@ public class BreakDetector implements MomentDetector, SensorEventListener {
         inBreak = false;
         questionsInSet = 0;
         nextMomentAt = 0;
+        TriggerStatus.questionsInSet = 0;
+        TriggerStatus.motion = TriggerStatus.Motion.STILL_WAITING;
+        TriggerStatus.breakStartedAt = 0;
     }
 
     private String reasonFor(int questionNumber) {

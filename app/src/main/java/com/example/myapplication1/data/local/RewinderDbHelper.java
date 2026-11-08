@@ -32,7 +32,7 @@ public final class RewinderDbHelper extends SQLiteOpenHelper {
      * Raise this number when you change the tables below. Then onUpgrade() runs.
      * For now onUpgrade simply deletes everything and starts again (fine while developing).
      */
-    private static final int DB_VERSION = 1;
+    private static final int DB_VERSION = 2;   // 2: added the ignored_questions table
 
     /**
      * true  = on first launch, also insert a made-up answer history for the last 7 days,
@@ -101,12 +101,30 @@ public final class RewinderDbHelper extends SQLiteOpenHelper {
                 + "times_correct INTEGER NOT NULL, "
                 + "times_wrong INTEGER NOT NULL)");
 
+        createIgnoredTable(db);
+
         seed(db);
+    }
+
+    /** Questions that were sent but never answered (kept apart from answers: not "wrong"). */
+    private static void createIgnoredTable(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + Rows.IGNORED + " ("
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + "question_id INTEGER NOT NULL, "
+                + "subject_id INTEGER NOT NULL, "
+                + "timestamp INTEGER NOT NULL)");
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_ignored_time ON " + Rows.IGNORED + "(timestamp)");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Development shortcut: delete everything and create it again.
+        if (oldVersion == 1) {
+            // 1 -> 2: only a new table, so the user's data is kept
+            createIgnoredTable(db);
+            return;
+        }
+        // Any other version: development shortcut, delete everything and create it again.
+        db.execSQL("DROP TABLE IF EXISTS " + Rows.IGNORED);
         db.execSQL("DROP TABLE IF EXISTS " + Rows.PROGRESS);
         db.execSQL("DROP TABLE IF EXISTS " + Rows.FEEDBACK);
         db.execSQL("DROP TABLE IF EXISTS " + Rows.ANSWERS);
@@ -130,6 +148,15 @@ public final class RewinderDbHelper extends SQLiteOpenHelper {
             long now = System.currentTimeMillis();
             for (AnswerRecord a : SampleData.answerHistory(questions, now, ZoneId.systemDefault())) {
                 db.insertOrThrow(Rows.ANSWERS, null, Rows.values(a));
+            }
+            // demo: roughly every 6th answer has an ignored question 25 minutes before it
+            List<AnswerRecord> history = SampleData.answerHistory(questions, now, ZoneId.systemDefault());
+            for (int i = 0; i < history.size(); i += 6) {
+                AnswerRecord a = history.get(i);
+                db.insertOrThrow(Rows.IGNORED, null, Rows.values(
+                        new com.example.myapplication1.data.IgnoredRecord(
+                                a.getQuestionId(), a.getSubjectId(),
+                                a.getTimestampMillis() - 25 * 60_000L)));
             }
             for (MomentFeedback f : SampleData.momentFeedback(now)) {
                 db.insertOrThrow(Rows.FEEDBACK, null, Rows.values(f));

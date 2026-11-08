@@ -24,6 +24,8 @@ public class QuizSettings {
     private static final String QUIET_END = "quiet_hours_end_minute";
     private static final String CALENDAR_ENABLED = "calendar_enabled";
     private static final String CALENDAR_IDS = "calendar_ids";
+    private static final String DAILY_GOAL = "daily_goal";
+    private static final String MONITORING = "monitoring_enabled";
 
     private final SharedPreferences prefs;
 
@@ -54,6 +56,33 @@ public class QuizSettings {
     /** E.g. setQuietHours(1 * 60, 9 * 60) = 01:00 – 09:00 (while studying late). */
     public void setQuietHours(int startMinute, int endMinute) {
         prefs.edit().putInt(QUIET_START, startMinute).putInt(QUIET_END, endMinute).apply();
+    }
+
+    // ---------------------------------------------------------------- monitoring on/off
+
+    /**
+     * The user's own on/off switch for the whole quiz monitoring (default: on).
+     * False after "Stop" in the service notification or the switch in Settings; the service
+     * is then NOT restarted by the app opening or by the phone rebooting.
+     */
+    public boolean isMonitoringEnabled() {
+        return prefs.getBoolean(MONITORING, true);
+    }
+
+    public void setMonitoringEnabled(boolean enabled) {
+        prefs.edit().putBoolean(MONITORING, enabled).apply();
+    }
+
+    // ---------------------------------------------------------------- daily goal
+
+    /** Questions the user wants to answer per day (Home shows the progress towards it). */
+    public int getDailyGoal() {
+        return prefs.getInt(DAILY_GOAL, TriggerConfig.DEFAULT_DAILY_GOAL);
+    }
+
+    public void setDailyGoal(int goal) {
+        int clamped = Math.max(TriggerConfig.MIN_DAILY_GOAL, Math.min(TriggerConfig.MAX_DAILY_GOAL, goal));
+        prefs.edit().putInt(DAILY_GOAL, clamped).apply();
     }
 
     // ---------------------------------------------------------------- calendar

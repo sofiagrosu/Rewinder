@@ -1,10 +1,13 @@
 package com.example.myapplication1.quiz;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.example.myapplication1.data.AnswerRecord;
 import com.example.myapplication1.data.DailyStats;
+import com.example.myapplication1.data.IgnoredRecord;
 import com.example.myapplication1.data.ProgressStore;
 import com.example.myapplication1.data.Question;
 import com.example.myapplication1.data.QuestionRepository;
@@ -14,6 +17,8 @@ import com.example.myapplication1.data.Subject;
 import com.example.myapplication1.quiz.delivery.QuestionNotifier;
 import com.example.myapplication1.quiz.ordering.ProgressUpdater;
 import com.example.myapplication1.quiz.ordering.QuestionPicker;
+import com.example.myapplication1.quiz.trigger.TriggerStatus;
+import com.example.myapplication1.quiz.delivery.AnswerReceiver;
 
 import java.util.List;
 
@@ -36,13 +41,15 @@ public final class QuizCoordinator {
     private static final String TAG = "QUIZ";
 
     /**
-     * For this long after a question appears: no new question replaces it,
-     * and if it is swiped away it comes back (silently). After that it disappears by itself.
+     * For this long after a question appears: no new question replaces it.
+     * After that it disappears by itself and counts as ignored.
+     * A swipe closes it for good at once (also counted as ignored, never as a wrong answer).
      */
     public static final long PROTECTION_MILLIS = 3 * 60_000;   // 3 minutes
 
     private static QuizCoordinator instance;
 
+    private final Context appContext;
     private final QuestionRepository repository;
     private final QuestionPicker picker;
     private final ProgressUpdater updater;
@@ -52,6 +59,15 @@ public final class QuizCoordinator {
     private long pendingQuestionId = -1;
     private long pendingShownAt = 0;
     private String pendingReason = "";
+    private boolean pendingFirstInSet = false;   // was it the first question of its set?
+
+    // Marks a question as "ignored" when it expires unanswered (needs the app process alive,
+    // which QuizService guarantees while it runs).
+    private final Handler handler = new Handler(Looper.getMainLooper());
+
+    // The last question that was actually sent, for the "De ce acum?" screen
+    private String lastMomentReason = "";
+    private long lastMomentAt = 0;
 
     /** Whoever shows the pending question inside the app (MainActivity's QuestionBanner). */
     public interface PendingListener {
@@ -68,6 +84,7 @@ public final class QuizCoordinator {
     }
 
     private QuizCoordinator(Context appContext) {
+        this.appContext = appContext;
         repository = RepositoryProvider.get();
         // Leitner/ordering progress is saved in the local database (SqliteProgressStore),
         // opened by RewinderApp: it survives when Android stops the app process.
@@ -98,8 +115,36 @@ public final class QuizCoordinator {
         pendingQuestionId = question.getId();
         pendingShownAt = now;
         pendingReason = reason;
+        pendingFirstInSet = TriggerStatus.questionsInSet == 1;   // written by BreakDetector
+        lastMomentReason = reason;
+        lastMomentAt = now;
+        scheduleExpiry(question.getId());
         notifyPendingChanged();
         Log.d(TAG, "Sent question " + question.getId() + " (" + reason + ")");
+    }
+
+    /** After the protection time, a question nobody answered is saved as ignored. */
+    private void scheduleExpiry(long questionId) {
+        handler.removeCallbacksAndMessages(null);
+        handler.postDelayed(() -> onExpired(questionId), PROTECTION_MILLIS);
+    }
+
+    private void onExpired(long questionId) {
+        if (questionId != pendingQuestionId) return;   // answered or swiped in the meantime
+        markIgnored(questionId);
+    }
+
+    /** Saves the pending question as ignored (NOT as a wrong answer) and clears it. */
+    private void markIgnored(long questionId) {
+        handler.removeCallbacksAndMessages(null);
+        Question question = repository.getQuestion(questionId);
+        if (question != null) {
+            repository.saveIgnored(new IgnoredRecord(
+                    questionId, question.getSubjectId(), pendingShownAt));
+            Log.d(TAG, "Question " + questionId + " ignored");
+        }
+        pendingQuestionId = -1;
+        notifyPendingChanged();
     }
 
     /** Called by AnswerReceiver when the user taps an option. */
@@ -110,37 +155,76 @@ public final class QuizCoordinator {
             return;
         }
         if (questionId == pendingQuestionId) {
-            pendingQuestionId = -1;   // answered: a new question may come at the next moment
+            handler.removeCallbacksAndMessages(null);   // answered: it must not count as ignored
+            pendingQuestionId = -1;   // a new question may come at the next moment
             notifyPendingChanged();
         }
-        boolean correct = question.isCorrect(chosenOption);
+        boolean dontKnow = chosenOption == AnswerReceiver.OPTION_DONT_KNOW;
+        // "Nu știu" is an answer, not an ignored question; it counts as not correct,
+        // so the question comes back sooner (Leitner) and the explanation is shown.
+        boolean correct = !dontKnow && question.isCorrect(chosenOption);
         long now = System.currentTimeMillis();
         updater.recordAnswer(question, correct, now);   // quiz ordering (Leitner)
         repository.saveAnswer(new AnswerRecord(          // shared history (Home, Stats)
                 question.getId(), question.getSubjectId(), now, chosenOption, correct));
-        notifier.showResult(question, getSubjectTitle(question.getSubjectId()), correct, statsLine());
-        Log.d(TAG, "Question " + questionId + ": " + (correct ? "correct" : "wrong"));
+        if (dontKnow) {
+            notifier.showDontKnow(question, getSubjectTitle(question.getSubjectId()), statsLine());
+        } else {
+            notifier.showResult(question, getSubjectTitle(question.getSubjectId()), correct, statsLine());
+        }
+        Log.d(TAG, "Question " + questionId + ": " + (dontKnow ? "don't know" : correct ? "correct" : "wrong"));
     }
 
     /**
      * Called by AnswerReceiver when the user swipes the question away.
-     * Within the protection time it comes back silently, for the remaining time only.
+     * The swipe closes it for good: it is saved as ignored (not as a wrong answer) and does not
+     * come back. If it was the first question of a set, we ask whether this is a bad moment.
      */
     public void onDismissed(long questionId) {
         if (questionId != pendingQuestionId) return;   // an old question, nothing to do
 
-        long now = System.currentTimeMillis();
-        long elapsed = now - pendingShownAt;
-        if (elapsed >= PROTECTION_MILLIS) {
-            pendingQuestionId = -1;                    // protection over: let it go
-            notifyPendingChanged();
-            return;
+        // The system may also report a notification that simply timed out; the expiry timer
+        // handles that case, and it is not a swipe.
+        long elapsed = System.currentTimeMillis() - pendingShownAt;
+        if (elapsed >= PROTECTION_MILLIS - 2_000) return;
+
+        boolean wasFirstInSet = pendingFirstInSet;
+        markIgnored(questionId);
+        if (wasFirstInSet) {
+            notifier.showBadMomentPrompt();   // "Este un moment nepotrivit pentru întrebări?"
         }
-        Question question = repository.getQuestion(questionId);
-        if (question == null) return;
-        notifier.showQuestion(question, getSubjectTitle(question.getSubjectId()), pendingReason,
-                true, PROTECTION_MILLIS - elapsed);
-        Log.d(TAG, "Question " + questionId + " shown again (" + (elapsed / 1000) + " s after it appeared)");
+    }
+
+    /**
+     * Called by AnswerReceiver: the answer to "Este un moment nepotrivit pentru întrebări?".
+     *   Da → the next two questions of the set are not sent; the detector tries again after 15 min.
+     *   Nu → nothing changes: the set goes on, one question per minute.
+     */
+    public void onBadMoment(boolean bad) {
+        notifier.cancelPrompt();
+        if (!bad) return;
+
+        withdrawPending();   // a question that arrived meanwhile is not wanted either
+        QuizService.postponeCycle(appContext);
+    }
+
+    /**
+     * Called when the user starts walking: the cycle of questions is interrupted, so the question
+     * still on screen is removed (cancelling it here also removes it from the smartwatch).
+     * It is not counted as ignored: the app withdrew it, the user did not skip it.
+     */
+    public void onWalkingStarted() {
+        notifier.cancelPrompt();
+        withdrawPending();
+    }
+
+    private void withdrawPending() {
+        if (pendingQuestionId < 0) return;
+        handler.removeCallbacksAndMessages(null);
+        notifier.cancelQuestion();
+        Log.d(TAG, "Question " + pendingQuestionId + " withdrawn");
+        pendingQuestionId = -1;
+        notifyPendingChanged();
     }
 
     /**
@@ -176,6 +260,15 @@ public final class QuizCoordinator {
     public long getPendingRemainingMillis() {
         long remaining = PROTECTION_MILLIS - (System.currentTimeMillis() - pendingShownAt);
         return pendingQuestionId >= 0 && remaining > 0 ? remaining : 0;
+    }
+
+    /** Why the last question was sent ("" if none yet), and when (0 if none yet). */
+    public String getLastMomentReason() {
+        return lastMomentReason;
+    }
+
+    public long getLastMomentAt() {
+        return lastMomentAt;
     }
 
     public void setPendingListener(PendingListener listener) {

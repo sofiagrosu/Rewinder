@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Texts of the "Nu știu" button and of the "bad moment" question. Separate file: no merge conflicts. -->
+<resources>
+    <string name="quiz_dont_know">Nu știu</string>
+    <string name="quiz_dont_know_headline">Nu știi încă. Răspunsul corect: %1$s</string>
+    <string name="quiz_bad_moment_title">Este un moment nepotrivit pentru întrebări?</string>
+    <string name="quiz_yes">Da</string>
+    <string name="quiz_no">Nu</string>
+    <string name="wn_motion_paused">Monitorizare în pauză (calendar ocupat sau ore de liniște)</string>
+</resources>

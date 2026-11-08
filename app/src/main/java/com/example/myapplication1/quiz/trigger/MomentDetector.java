@@ -14,4 +14,11 @@ public interface MomentDetector {
 
     /** Stop watching and release everything (timers, sensors). Safe to call twice. */
     void stop();
+
+    /**
+     * The user said "this is a bad moment": drop the rest of the current set and try again
+     * after the normal pause. Detectors without sets ignore it.
+     */
+    default void postponeCycle() {
+    }
 }

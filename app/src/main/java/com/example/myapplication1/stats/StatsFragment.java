@@ -32,6 +32,9 @@ public class StatsFragment extends Fragment {
     private CircularProgressIndicator ringAccuracy;
     private TextView txtRingPercent;
     private TextView txtGoodMoments;
+    private TextView txtIgnored;
+    private TextView txtCounts;
+    private TextView txtResponseRate;
     private BarChartView barChart;
     private LinearLayout weakContainer;
     private TextView txtWeakEmpty;
@@ -46,6 +49,9 @@ public class StatsFragment extends Fragment {
         ringAccuracy = view.findViewById(R.id.ringAccuracy);
         txtRingPercent = view.findViewById(R.id.txtRingPercent);
         txtGoodMoments = view.findViewById(R.id.txtGoodMoments);
+        txtIgnored = view.findViewById(R.id.txtIgnored);
+        txtCounts = view.findViewById(R.id.txtCounts);
+        txtResponseRate = view.findViewById(R.id.txtResponseRate);
         barChart = view.findViewById(R.id.barChart);
         weakContainer = view.findViewById(R.id.weakContainer);
         txtWeakEmpty = view.findViewById(R.id.txtWeakEmpty);
@@ -72,6 +78,19 @@ public class StatsFragment extends Fragment {
             txtGoodMoments.setText(R.string.good_moments_none);
         } else {
             txtGoodMoments.setText(getString(R.string.good_moments_format, goodMoments));
+        }
+
+        // ---- answered / correct / wrong ----
+        txtCounts.setText(getString(R.string.counts_format,
+                stats.answeredLastDays(DAYS), stats.correctLastDays(DAYS), stats.wrongLastDays(DAYS)));
+
+        // ---- ignored questions + response rate (ignored ones do NOT count as wrong answers) ----
+        txtIgnored.setText(getString(R.string.ignored_format, stats.ignoredLastDays(DAYS)));
+        int responseRate = stats.responseRateLastDays(DAYS);
+        if (responseRate < 0) {
+            txtResponseRate.setText(R.string.response_rate_none);
+        } else {
+            txtResponseRate.setText(getString(R.string.response_rate_format, responseRate));
         }
 
         // ---- questions per day ----

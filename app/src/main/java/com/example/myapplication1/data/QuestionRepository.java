@@ -51,6 +51,12 @@ public interface QuestionRepository {
     /** All answers with timestamp >= sinceMillis. Use 0 for everything. */
     List<AnswerRecord> getAnswersSince(long sinceMillis);
 
+    /** Saves a question that was sent but never answered (see IgnoredRecord). */
+    void saveIgnored(IgnoredRecord ignored);
+
+    /** All ignored questions with timestamp >= sinceMillis. Use 0 for everything. */
+    List<IgnoredRecord> getIgnoredSince(long sinceMillis);
+
     void saveMomentFeedback(MomentFeedback feedback);
 
     /** All feedback with timestamp >= sinceMillis. Use 0 for everything. */

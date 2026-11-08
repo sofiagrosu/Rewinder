@@ -17,7 +17,6 @@
     <string name="upload_subject_hint">Subject (e.g. Anatomy)</string>
     <string name="upload_chapter_hint">Chapter (e.g. Brachial plexus)</string>
     <string name="upload_text_hint">Paste your notes here…</string>
-    <string name="upload_pdf_soon">PDF support will be available in a future version (optional in plan). For now, please paste the text.</string>
     <string name="upload_question_types">Question types</string>
     <string name="type_true_false">True / False</string>
     <string name="type_two_options">Two options</string>

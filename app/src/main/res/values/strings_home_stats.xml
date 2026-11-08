@@ -21,8 +21,6 @@
     <string name="active_subjects">Materii active</string>
     <string name="in_rotation">%1$s în rotație</string>
     <string name="upload_material">Încarcă material</string>
-    <string name="toast_why_now">Aici se va deschide ecranul „De ce acum?”</string>
-    <string name="toast_upload">Aici se va deschide ecranul „Încarcă material”</string>
     <!--  ===== Stats =====  -->
     <string name="stats_title">Statistici</string>
     <string name="stats_subtitle">Ultimele 7 zile</string>
@@ -31,7 +29,34 @@
     <string name="good_moments_none">Momente bune: –</string>
     <string name="questions_per_day">Întrebări pe zi</string>
     <string name="weakest_subjects">Materiile cele mai slabe</string>
+    <string name="counts_format">Răspunsuri: %1$d · corecte %2$d · greșite %3$d</string>
+    <string name="ignored_format">Întrebări ignorate: %1$d</string>
+    <string name="response_rate_format">Rată de răspuns: %1$d%%</string>
+    <string name="response_rate_none">Rată de răspuns: –</string>
     <string name="weak_empty">Încă nu ai răspuns la nicio întrebare.</string>
+    <!--  ===== De ce acum? =====  -->
+    <string name="wn_title">De ce acum?</string>
+    <string name="wn_state_label">Starea ta acum</string>
+    <string name="wn_verdict_good">Acum e un moment bun</string>
+    <string name="wn_verdict_bad">Acum nu e un moment potrivit</string>
+    <string name="wn_motion_still">Ești pe loc de %1$s</string>
+    <string name="wn_motion_walking">Ai mers recent; așteptăm un minut fără pași</string>
+    <string name="wn_motion_waiting">Încă nu ai stat un minut pe loc</string>
+    <string name="wn_motion_unknown">Nu pot urmări pașii (permisiune sau senzor lipsă)</string>
+    <string name="wn_quiet_off">Orele de liniște sunt oprite</string>
+    <string name="wn_quiet_in">Ore de liniște, până la %1$s</string>
+    <string name="wn_quiet_out">În afara orelor de liniște</string>
+    <string name="wn_calendar_off">Calendarul nu e folosit</string>
+    <string name="wn_calendar_no_permission">Calendar: lipsește permisiunea, nu se verifică</string>
+    <string name="wn_calendar_busy">Calendar ocupat, până la %1$s</string>
+    <string name="wn_calendar_free">Calendar liber</string>
+    <string name="wn_last_none">Încă nu a fost trimisă nicio întrebare.</string>
+    <string name="wn_last_format">Ultima întrebare: la %1$s (%2$s)</string>
+    <string name="wn_was_good">A fost un moment bun?</string>
+    <string name="wn_yes">Da</string>
+    <string name="wn_no">Nu</string>
+    <string name="wn_thanks">Mulțumim pentru răspuns</string>
+    <string name="wn_back">Înapoi</string>
     <!--  ===== Temporary screens =====  -->
     <string name="placeholder_coming_soon">%1$s: în lucru</string>
     <!--  ===== Romanian plurals: {one, few, other}. See util/RoPlural.java =====  -->

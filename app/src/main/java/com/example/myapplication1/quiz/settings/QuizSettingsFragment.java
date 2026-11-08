@@ -16,6 +16,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.myapplication1.R;
+import com.example.myapplication1.quiz.QuizService;
+import com.example.myapplication1.quiz.trigger.TriggerConfig;
 import com.example.myapplication1.quiz.trigger.blocked.BlockedTimeSource;
 import com.example.myapplication1.quiz.trigger.blocked.CalendarBusySource;
 import com.example.myapplication1.quiz.trigger.blocked.QuietHoursSource;
@@ -40,6 +42,8 @@ public class QuizSettingsFragment extends Fragment {
 
     private QuizSettings settings;
 
+    private MaterialSwitch switchMonitoring;
+    private TextView txtGoalValue;
     private MaterialSwitch switchQuietHours;
     private MaterialButton btnQuietStart;
     private MaterialButton btnQuietEnd;
@@ -74,6 +78,16 @@ public class QuizSettingsFragment extends Fragment {
         calendarList = view.findViewById(R.id.calendarList);
         txtStatus = view.findViewById(R.id.txtStatus);
 
+        // ---- monitoring on/off (the same flag the "Stop" button in the service notification sets) ----
+        switchMonitoring = view.findViewById(R.id.switchMonitoring);
+        showMonitoringState();
+
+        // ---- daily goal ----
+        txtGoalValue = view.findViewById(R.id.txtGoalValue);
+        view.findViewById(R.id.btnGoalMinus).setOnClickListener(v -> changeGoal(-TriggerConfig.DAILY_GOAL_STEP));
+        view.findViewById(R.id.btnGoalPlus).setOnClickListener(v -> changeGoal(TriggerConfig.DAILY_GOAL_STEP));
+        txtGoalValue.setText(String.valueOf(settings.getDailyGoal()));
+
         // ---- quiet hours ----
         switchQuietHours.setChecked(settings.isQuietHoursEnabled());
         switchQuietHours.setOnCheckedChangeListener((button, checked) -> {
@@ -104,7 +118,29 @@ public class QuizSettingsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (txtStatus != null) refresh();   // e.g. the time changed while the screen was hidden
+        if (txtStatus != null) {
+            showMonitoringState();
+            refresh();   // e.g. the time changed while the screen was hidden
+        }
+    }
+
+    /** Shows the saved state without triggering the listener (it may have changed from the notification). */
+    private void showMonitoringState() {
+        switchMonitoring.setOnCheckedChangeListener(null);
+        switchMonitoring.setChecked(settings.isMonitoringEnabled());
+        switchMonitoring.setOnCheckedChangeListener((button, checked) -> {
+            if (checked) {
+                settings.setMonitoringEnabled(true);
+                QuizService.start(requireContext());
+            } else {
+                QuizService.stop(requireContext());   // saves "off" and ends the service
+            }
+        });
+    }
+
+    private void changeGoal(int delta) {
+        settings.setDailyGoal(settings.getDailyGoal() + delta);   // clamped inside QuizSettings
+        txtGoalValue.setText(String.valueOf(settings.getDailyGoal()));
     }
 
     // ---------------------------------------------------------------- UI updates

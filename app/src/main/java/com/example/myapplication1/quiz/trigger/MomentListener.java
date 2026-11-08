@@ -8,4 +8,11 @@ public interface MomentListener {
      *               Can later be shown by the "Why now?" button.
      */
     void onMomentDetected(String reason);
+
+    /**
+     * The user started walking: the cycle of questions is interrupted, so a question that is
+     * still on screen is no longer wanted.
+     */
+    default void onWalkingStarted() {
+    }
 }

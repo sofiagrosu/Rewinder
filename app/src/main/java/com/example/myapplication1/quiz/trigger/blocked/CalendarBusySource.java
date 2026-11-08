@@ -22,6 +22,9 @@ import java.util.Set;
  * A Google account on the phone syncs Google Calendar here automatically, so no Google login,
  * no internet and no Google API are needed: only the READ_CALENDAR permission.
  *
+ * PRIVACY: only the start and end time of an event are read. The title (and every other text
+ * field) is never requested from the Calendar Provider.
+ *
  * Optional (off by default). Counts only events that:
  *   - are marked "Busy" (not "Free"),
  *   - are NOT all-day events (otherwise a birthday would block a whole day),
@@ -58,7 +61,6 @@ public class CalendarBusySource implements BlockedTimeSource {
         String[] projection = {
                 CalendarContract.Instances.BEGIN,
                 CalendarContract.Instances.END,
-                CalendarContract.Instances.TITLE,
         };
 
         StringBuilder selection = new StringBuilder()
@@ -82,9 +84,7 @@ public class CalendarBusySource implements BlockedTimeSource {
                 uri.build(), projection, selection.toString(), null, null)) {
             if (c == null) return result;
             while (c.moveToNext()) {
-                String title = c.getString(2);
-                result.add(new TimeRange(c.getLong(0), c.getLong(1),
-                        title != null && !title.isEmpty() ? title : "Calendar event"));
+                result.add(new TimeRange(c.getLong(0), c.getLong(1), "Calendar event"));
             }
         } catch (SecurityException e) {
             Log.w(TAG, "Calendar permission was revoked", e);

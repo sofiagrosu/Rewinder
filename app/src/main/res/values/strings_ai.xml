@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Texts of the AI generation part of the Upload screen. Separate file: no merge conflicts. -->
+<resources>
+    <string name="upload_pick_pdf">Choose PDF</string>
+    <string name="upload_no_pdf">No PDF chosen</string>
+    <string name="upload_remove_pdf">Remove</string>
+    <string name="upload_count">Number of questions</string>
+    <string name="upload_difficulty">Difficulty</string>
+    <string name="difficulty_easy">Easy</string>
+    <string name="difficulty_medium">Medium</string>
+    <string name="difficulty_hard">Hard</string>
+    <string name="upload_generating">Generating…</string>
+    <string name="upload_err_need_material">Paste some text (at least 40 characters) or choose a PDF.</string>
+    <string name="upload_err_pdf_read">Could not read this PDF.</string>
+    <string name="upload_err_pdf_big">This PDF is too large (max 10 MB).</string>
+    <string name="ai_err_network">Could not reach the question server. Check your internet connection and try again.</string>
+    <string name="ai_err_busy">The AI is busy right now. Wait a minute and try again.</string>
+    <string name="ai_err_too_large">The material is too large. Use a shorter text or a smaller PDF.</string>
+    <string name="ai_err_invalid">The AI did not return usable questions. Try again or use a clearer material.</string>
+    <string name="ai_err_failed">Something went wrong while generating the questions.</string>
+</resources>

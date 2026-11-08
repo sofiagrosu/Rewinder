@@ -31,7 +31,24 @@ public class TriggerManager {
         running = true;
         this.context = context.getApplicationContext();
         for (MomentDetector detector : detectors) {
-            detector.start(this.context, this::onDetectorSignal);
+            detector.start(this.context, new MomentListener() {
+                @Override
+                public void onMomentDetected(String reason) {
+                    onDetectorSignal(reason);
+                }
+
+                @Override
+                public void onWalkingStarted() {
+                    listener.onWalkingStarted();   // not a "moment": no condition can veto it
+                }
+            });
+        }
+    }
+
+    /** Passes "bad moment, try later" on to the detectors. */
+    public void postponeCycle() {
+        for (MomentDetector detector : detectors) {
+            detector.postponeCycle();
         }
     }
 

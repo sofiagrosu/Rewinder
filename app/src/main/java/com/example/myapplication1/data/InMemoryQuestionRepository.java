@@ -14,6 +14,7 @@ public class InMemoryQuestionRepository implements QuestionRepository {
     private final List<Question> questions = new ArrayList<>();
     private final List<AnswerRecord> answers = new ArrayList<>();
     private final List<MomentFeedback> feedback = new ArrayList<>();
+    private final List<IgnoredRecord> ignored = new ArrayList<>();
 
     private long lastSubjectId = 0;
     private long lastQuestionId = 0;
@@ -124,6 +125,20 @@ public class InMemoryQuestionRepository implements QuestionRepository {
         List<AnswerRecord> result = new ArrayList<>();
         for (AnswerRecord a : answers) {
             if (a.getTimestampMillis() >= sinceMillis) result.add(a);
+        }
+        return result;
+    }
+
+    @Override
+    public synchronized void saveIgnored(IgnoredRecord record) {
+        ignored.add(record);
+    }
+
+    @Override
+    public synchronized List<IgnoredRecord> getIgnoredSince(long sinceMillis) {
+        List<IgnoredRecord> result = new ArrayList<>();
+        for (IgnoredRecord r : ignored) {
+            if (r.getTimestampMillis() >= sinceMillis) result.add(r);
         }
         return result;
     }

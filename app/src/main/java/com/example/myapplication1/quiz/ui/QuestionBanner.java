@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat;
 import com.example.myapplication1.R;
 import com.example.myapplication1.data.Question;
 import com.example.myapplication1.quiz.QuizCoordinator;
+import com.example.myapplication1.quiz.delivery.AnswerReceiver;
 import com.example.myapplication1.quiz.delivery.QuestionNotifier;
 
 import java.util.Locale;
@@ -39,6 +40,7 @@ public final class QuestionBanner implements QuizCoordinator.PendingListener {
     private final View optionsRow;
     private final Button[] optionButtons;
     private final Button okButton;
+    private final Button dontKnowButton;
 
     private final QuizCoordinator coordinator;
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -58,12 +60,14 @@ public final class QuestionBanner implements QuizCoordinator.PendingListener {
                 bannerView.findViewById(R.id.btnOption2),
                 bannerView.findViewById(R.id.btnOption3)};
         okButton = bannerView.findViewById(R.id.btnBannerOk);
+        dontKnowButton = bannerView.findViewById(R.id.btnDontKnow);
         coordinator = QuizCoordinator.getInstance(bannerView.getContext());
 
         for (int i = 0; i < optionButtons.length; i++) {
             final int option = i + 1;              // buttons are 0-based, options 1-based
             optionButtons[i].setOnClickListener(v -> answer(option));
         }
+        dontKnowButton.setOnClickListener(v -> answer(AnswerReceiver.OPTION_DONT_KNOW));
         okButton.setOnClickListener(v -> hide());
     }
 
@@ -108,6 +112,7 @@ public final class QuestionBanner implements QuizCoordinator.PendingListener {
             if (exists) optionButtons[i].setText(question.getOption(option));
         }
         optionsRow.setVisibility(View.VISIBLE);
+        dontKnowButton.setVisibility(View.VISIBLE);
         okButton.setVisibility(View.GONE);
         card.setVisibility(View.VISIBLE);
         // hides by itself when the protection time is over (the moment the notification disappears)
@@ -121,19 +126,23 @@ public final class QuestionBanner implements QuizCoordinator.PendingListener {
             hide();                                // expired or already answered elsewhere
             return;
         }
-        boolean correct = question.isCorrect(option);
+        boolean dontKnow = option == AnswerReceiver.OPTION_DONT_KNOW;
+        boolean correct = !dontKnow && question.isCorrect(option);
         coordinator.onAnswer(question.getId(), option);   // same path as the notification buttons
-        showResult(question, correct);
+        showResult(question, correct, dontKnow);
     }
 
-    private void showResult(Question question, boolean correct) {
+    private void showResult(Question question, boolean correct, boolean dontKnow) {
         showingResult = true;
         handler.removeCallbacks(expiryCheck);
-        label.setText(QuestionNotifier.resultHeadline(question, correct));
+        label.setText(dontKnow
+                ? QuestionNotifier.dontKnowHeadline(card.getContext(), question)
+                : QuestionNotifier.resultHeadline(question, correct));
         label.setTextColor(color(correct ? R.color.primary : R.color.danger));
         reason.setVisibility(View.GONE);
         setOptionalText(text, question.getExplanation());
         optionsRow.setVisibility(View.GONE);
+        dontKnowButton.setVisibility(View.GONE);
         okButton.setVisibility(View.VISIBLE);
     }
 

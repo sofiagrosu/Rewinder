@@ -80,6 +80,15 @@
                 tools:text="ORDER BY" />
         </LinearLayout>
 
+        <!-- "Nu știu": shows the correct answer + explanation, works for every question type -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDontKnow"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/quiz_dont_know" />
+
         <!-- closes the result -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnBannerOk"

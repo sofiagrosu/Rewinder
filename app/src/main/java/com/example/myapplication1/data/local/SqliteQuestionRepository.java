@@ -4,6 +4,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.example.myapplication1.data.AnswerRecord;
+import com.example.myapplication1.data.IgnoredRecord;
 import com.example.myapplication1.data.MomentFeedback;
 import com.example.myapplication1.data.Question;
 import com.example.myapplication1.data.QuestionRepository;
@@ -139,6 +140,21 @@ public class SqliteQuestionRepository implements QuestionRepository {
         try (Cursor c = db().query(Rows.ANSWERS, null, "timestamp >= ?",
                 new String[]{String.valueOf(sinceMillis)}, null, null, "timestamp ASC")) {
             while (c.moveToNext()) result.add(Rows.answer(c));
+        }
+        return result;
+    }
+
+    @Override
+    public synchronized void saveIgnored(IgnoredRecord ignored) {
+        db().insertOrThrow(Rows.IGNORED, null, Rows.values(ignored));
+    }
+
+    @Override
+    public synchronized List<IgnoredRecord> getIgnoredSince(long sinceMillis) {
+        List<IgnoredRecord> result = new ArrayList<>();
+        try (Cursor c = db().query(Rows.IGNORED, null, "timestamp >= ?",
+                new String[]{String.valueOf(sinceMillis)}, null, null, "timestamp ASC")) {
+            while (c.moveToNext()) result.add(Rows.ignored(c));
         }
         return result;
     }
