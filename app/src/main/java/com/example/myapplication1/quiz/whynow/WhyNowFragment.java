@@ -79,7 +79,7 @@ public class WhyNowFragment extends Fragment {
         switch (TriggerStatus.motion) {
             case BREAK:
                 long minutes = Math.max(0, (SystemClock.elapsedRealtime() - TriggerStatus.breakStartedAt) / 60_000);
-                String since = minutes < 1 ? "sub un minut" : minutes + " min";
+                String since = minutes < 1 ? "less than a minute" : minutes + " min";
                 addCheck(OK, getString(R.string.wn_motion_still, since));
                 break;
             case PAUSED:

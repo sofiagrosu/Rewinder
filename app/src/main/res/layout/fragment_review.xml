@@ -34,7 +34,7 @@
                 android:layout_marginTop="4dp"
                 android:textColor="@color/text_secondary"
                 android:textSize="16sp"
-                tools:text="12 întrebări de verificat" />
+                tools:text="12 questions to review" />
 
             <!-- warning: AI can make mistakes -->
             <com.google.android.material.card.MaterialCardView

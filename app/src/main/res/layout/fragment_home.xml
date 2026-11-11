@@ -22,7 +22,7 @@
             android:textColor="@color/text_primary"
             android:textSize="32sp"
             android:textStyle="bold"
-            tools:text="Bună ziua" />
+            tools:text="Good afternoon" />
 
         <TextView
             android:id="@+id/txtSolvedToday"
@@ -31,7 +31,7 @@
             android:layout_marginTop="4dp"
             android:textColor="@color/text_secondary"
             android:textSize="16sp"
-            tools:text="Azi ai rezolvat 14 întrebări" />
+            tools:text="Today you answered 14 questions" />
 
         <!-- ===== Daily goal ===== -->
         <com.google.android.material.card.MaterialCardView
@@ -81,6 +81,27 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- ===== QUIZ: answer a practice set in the app (keeps the goal/streak on busy days) ===== -->
+        <!-- white button with a lavender outline: stands out on the background,
+             but stays less loud than the main "Upload material" button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPractice"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="12dp"
+            android:text="@string/practice_button"
+            android:textColor="@color/primary"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:backgroundTint="@color/white"
+            app:cornerRadius="16dp"
+            app:icon="@drawable/ic_practice"
+            app:iconGravity="textStart"
+            app:iconTint="@color/primary"
+            app:strokeColor="@color/primary"
+            app:strokeWidth="2dp" />
+
         <!-- ===== Daily streak + Accuracy today (two cards in one row) ===== -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -107,7 +128,7 @@
                         android:textColor="@color/text_primary"
                         android:textSize="28sp"
                         android:textStyle="bold"
-                        tools:text="6 zile" />
+                        tools:text="6 days" />
 
                     <TextView
                         android:layout_width="wrap_content"

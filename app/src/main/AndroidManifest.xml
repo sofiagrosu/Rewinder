@@ -43,6 +43,11 @@
         </activity>
 
         <!-- Receives the taps on the answer buttons of quiz notifications -->
+        <!-- QUIZ: in-app practice set of 3 questions (opened from Home) -->
+        <activity
+            android:name=".quiz.ui.PracticeActivity"
+            android:exported="false" />
+
         <receiver
             android:name=".quiz.delivery.AnswerReceiver"
             android:exported="false" />

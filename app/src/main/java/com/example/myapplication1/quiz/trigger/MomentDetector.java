@@ -21,4 +21,11 @@ public interface MomentDetector {
      */
     default void postponeCycle() {
     }
+
+    /**
+     * The question sent for the last moment was answered (now). Detectors that space questions
+     * "after the answer" (BreakDetector) start counting the pause from here.
+     */
+    default void onQuestionAnswered() {
+    }
 }

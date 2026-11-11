@@ -3,8 +3,8 @@
 // question must never even reach it). Pure functions: easy to test without the API.
 
 const TYPES = ["TRUE_FALSE", "TWO_OPTIONS", "MISSING_WORD"];
-const TRUE_TEXT = "Adevărat";
-const FALSE_TEXT = "Fals";
+const TRUE_TEXT = "True";
+const FALSE_TEXT = "False";
 const GAP = "____";
 const MAX_TEXT = 300;       // a question must fit in a notification
 const MAX_OPTION = 40;      // an option must fit on a watch button

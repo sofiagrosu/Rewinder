@@ -58,7 +58,8 @@ public class QuestionNotifier {
     /**
      * Shows the question with its answer buttons.
      * @param silent        true for a quiet re-show (no sound, no pop-up)
-     * @param timeoutMillis the notification disappears by itself after this time if unanswered
+     * @param timeoutMillis the notification disappears by itself after this time if unanswered;
+     *                      0 = it stays until it is answered (what QuizCoordinator uses)
      */
     public void showQuestion(Question question, String title, String reason,
                              boolean silent, long timeoutMillis) {
@@ -68,8 +69,8 @@ public class QuestionNotifier {
                 .setSubText(reason)                          // "why now", shown in the header
                 .setAutoCancel(false)                        // tapping the text opens the app, question stays
                 .setSilent(silent)
-                .setTimeoutAfter(timeoutMillis)
                 .setDeleteIntent(dismissIntent(question.getId()));   // told when the user swipes it away
+        if (timeoutMillis > 0) builder.setTimeoutAfter(timeoutMillis);
 
         for (int n = 1; n <= question.getOptionCount(); n++) {
             // the icon is only drawn on the watch (phones ignore action icons since Android 7)
@@ -93,7 +94,7 @@ public class QuestionNotifier {
         showOutcome(question, title, resultHeadline(question, correct), statsLine);
     }
 
-    /** "Nu știu": shows the correct answer and the short explanation paragraph. */
+    /** "I don't know": shows the correct answer and the short explanation paragraph. */
     public void showDontKnow(Question question, String title, String statsLine) {
         showOutcome(question, title, dontKnowHeadline(context, question), statsLine);
     }
@@ -116,7 +117,7 @@ public class QuestionNotifier {
         notifySafely(QUESTION_NOTIFICATION_ID, builder);
     }
 
-    /** "Este un moment nepotrivit pentru întrebări?" with Da / Nu, after a swipe on the first question. */
+    /** "Not a good time for questions?" with Yes / No, after a swipe on a question. */
     public void showBadMomentPrompt() {
         NotificationCompat.Builder builder = baseBuilder("Rewinder")
                 .setContentText(context.getString(R.string.quiz_bad_moment_title))
@@ -146,7 +147,7 @@ public class QuestionNotifier {
                 : "✗ The answer was: " + question.getOption(question.getCorrectOption());
     }
 
-    /** "Nu știi încă. Răspunsul corect: ..." — used by the notification and by the in-app banner. */
+    /** "Not yet. The correct answer: ..." — used by the notification and by the in-app banner. */
     public static String dontKnowHeadline(Context context, Question question) {
         return context.getString(R.string.quiz_dont_know_headline,
                 question.getOption(question.getCorrectOption()));

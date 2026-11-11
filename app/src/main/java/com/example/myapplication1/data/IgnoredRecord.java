@@ -1,8 +1,8 @@
 package com.example.myapplication1.data;
 
 /**
- * A question that was sent but never answered: it stayed on screen for its whole
- * protection time (see QuizCoordinator.PROTECTION_MILLIS) and disappeared.
+ * A question that was sent but never answered: the user removed it with
+ * "bad moment → Da" (see QuizCoordinator.onBadMoment).
  *
  * Kept apart from AnswerRecord on purpose: an ignored question is NOT a wrong answer,
  * so it must not lower the accuracy. Stats uses it only for "ignored" and "response rate".

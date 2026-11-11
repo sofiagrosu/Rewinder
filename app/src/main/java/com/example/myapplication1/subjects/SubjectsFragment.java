@@ -30,7 +30,7 @@ import java.util.Locale;
 public class SubjectsFragment extends Fragment {
 
     private static final DateTimeFormatter EXAM_FORMAT =
-            DateTimeFormatter.ofPattern("d MMM", new Locale("ro"));
+            DateTimeFormatter.ofPattern("d MMM", Locale.ENGLISH);
 
     private LinearLayout subjectsList;
     private TextView txtEmpty;

@@ -27,12 +27,18 @@ public final class TriggerConfig {
     /** During a break, questions come in sets of this many... */
     public static final int QUESTIONS_PER_SET = 3;
 
-    /** ...this far apart inside a set... */
+    /** Inside a set, the next question comes this long AFTER THE PREVIOUS ONE WAS ANSWERED. */
     public static final long QUESTION_SPACING_MILLIS = 60_000;        // 1 minute
 
-    /** ...and the next set comes this long after the last question of the previous set. */
+    /** The next set comes this long after the last question of the set was answered (or after "bad moment"). */
     public static final long PAUSE_BETWEEN_SETS_MILLIS = 15 * 60_000; // 15 minutes
     // TIP for testing: 60_000 (1 minute)
+
+    /**
+     * When a moment could not be used (quiet hours, busy in the calendar, nothing to ask),
+     * the detector tries again after this long.
+     */
+    public static final long RETRY_AFTER_NOT_SENT_MILLIS = 60_000;    // 1 minute
 
     /** How often the detector checks the clock. */
     public static final long CHECK_INTERVAL_MILLIS = 5_000;           // 5 seconds

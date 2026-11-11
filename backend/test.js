@@ -9,7 +9,7 @@ const good = [
 ];
 let r = normalizeAll(good, all, 10);
 assert.strictEqual(r.questions.length, 3);
-assert.deepStrictEqual(r.questions[0].options, ["Adevărat", "Fals"]);   // forced
+assert.deepStrictEqual(r.questions[0].options, ["True", "False"]);   // forced
 
 const bad = [
   { type: "MISSING_WORD", text: "No gap here", options: ["a", "b", "c"], correctIndex: 0 },       // no gap

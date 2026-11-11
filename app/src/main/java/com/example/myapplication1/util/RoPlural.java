@@ -3,14 +3,13 @@ package com.example.myapplication1.util;
 import java.util.Locale;
 
 /**
- * Romanian plurals: "1 întrebare", "14 întrebări", "20 de întrebări".
- *
- * Android's own plurals depend on the phone's language, so they would be wrong
- * on a phone set to English. This helper always uses the Romanian rule.
+ * Picks one of three plural forms {one, few, other} (rule written for Romanian: 1 / 2-19 / 20+).
+ * The app is now in English, so the forms in strings_home_stats.xml are
+ * {"%d question", "%d questions", "%d questions"}: the result is correct English.
  *
  * Usage (forms come from strings_home_stats.xml, e.g. R.array.plural_questions):
  *     String[] forms = getResources().getStringArray(R.array.plural_questions);
- *     String text = RoPlural.format(forms, 14);   // "14 întrebări"
+ *     String text = RoPlural.format(forms, 14);   // "14 questions"
  */
 public final class RoPlural {
 

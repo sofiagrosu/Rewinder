@@ -23,7 +23,7 @@ public class AnswerReceiver extends BroadcastReceiver {
     public static final String EXTRA_OPTION = "option";
     public static final String EXTRA_BAD_MOMENT = "badMoment";
 
-    /** The "Nu știu" button: not option 1..3, so it can never match the correct option. */
+    /** The "I don't know" button: not option 1..3, so it can never match the correct option. */
     public static final int OPTION_DONT_KNOW = 0;
 
     @Override

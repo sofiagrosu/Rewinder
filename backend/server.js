@@ -92,7 +92,7 @@ const DIFFICULTY_TEXT = {
 
 const TYPE_TEXT = {
   TRUE_FALSE:
-    'TRUE_FALSE: a single statement. "options" must be ["Adevărat","Fals"]; correctIndex 0 = true, 1 = false. Make roughly half of the statements false.',
+    'TRUE_FALSE: a single statement. "options" must be ["True","False"]; correctIndex 0 = true, 1 = false. Make roughly half of the statements false.',
 
   TWO_OPTIONS:
     'TWO_OPTIONS: a sentence containing the gap "____" and exactly 2 candidate words/short phrases in "options".',

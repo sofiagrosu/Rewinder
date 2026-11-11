@@ -1,6 +1,7 @@
 package com.example.myapplication1.home;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +17,7 @@ import com.example.myapplication1.MainActivity;
 import com.example.myapplication1.R;
 import com.example.myapplication1.data.RepositoryProvider;
 import com.example.myapplication1.quiz.settings.QuizSettings;
+import com.example.myapplication1.quiz.ui.PracticeActivity;
 import com.example.myapplication1.quiz.whynow.WhyNowFragment;
 import com.example.myapplication1.stats.StatsCalculator;
 import com.example.myapplication1.upload.UploadMaterialFragment;
@@ -67,6 +69,10 @@ public class HomeFragment extends Fragment {
                 ((MainActivity) requireActivity()).openScreen(new WhyNowFragment()));
         btnUpload.setOnClickListener(v ->
                 ((MainActivity) requireActivity()).openScreen(new UploadMaterialFragment()));
+
+        // QUIZ: practice set of 3 questions in the app; Home refreshes when it closes (onResume)
+        view.findViewById(R.id.btnPractice).setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), PracticeActivity.class)));
     }
 
     /** Refresh every time the screen comes back, so answers given meanwhile show up. */

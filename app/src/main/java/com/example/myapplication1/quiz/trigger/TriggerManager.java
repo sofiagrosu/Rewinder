@@ -33,8 +33,8 @@ public class TriggerManager {
         for (MomentDetector detector : detectors) {
             detector.start(this.context, new MomentListener() {
                 @Override
-                public void onMomentDetected(String reason) {
-                    onDetectorSignal(reason);
+                public boolean onMomentDetected(String reason) {
+                    return onDetectorSignal(reason);
                 }
 
                 @Override
@@ -42,6 +42,14 @@ public class TriggerManager {
                     listener.onWalkingStarted();   // not a "moment": no condition can veto it
                 }
             });
+        }
+    }
+
+    /** Passes "the question was answered" on to the detectors (spacing counts from the answer). */
+    public void onQuestionAnswered() {
+        if (!running) return;
+        for (MomentDetector detector : detectors) {
+            detector.onQuestionAnswered();
         }
     }
 
@@ -60,12 +68,15 @@ public class TriggerManager {
         }
     }
 
-    /** Called by any detector. Passes the moment on only if every condition agrees. */
-    private void onDetectorSignal(String reason) {
+    /**
+     * Called by any detector. Passes the moment on only if every condition agrees.
+     * @return true if a question was really sent
+     */
+    private boolean onDetectorSignal(String reason) {
         long now = System.currentTimeMillis();
         for (MomentCondition condition : conditions) {
-            if (!condition.allowsNow(context, now)) return;   // vetoed
+            if (!condition.allowsNow(context, now)) return false;   // vetoed
         }
-        listener.onMomentDetected(reason);
+        return listener.onMomentDetected(reason);
     }
 }

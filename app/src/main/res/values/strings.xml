@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">Rewinder</string>
     <!--  Bottom navigation (res/menu/bottom_nav.xml)  -->
-    <string name="nav_home">Acasă</string>
-    <string name="nav_subjects">Materii</string>
-    <string name="nav_stats">Statistici</string>
-    <string name="nav_settings">Setări</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_subjects">Subjects</string>
+    <string name="nav_stats">Stats</string>
+    <string name="nav_settings">Settings</string>
 </resources>

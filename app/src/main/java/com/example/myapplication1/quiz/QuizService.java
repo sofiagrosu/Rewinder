@@ -62,6 +62,7 @@ public class QuizService extends Service {
     private static final String ACTION_RESTART_DETECTORS = "com.example.myapplication1.quiz.RESTART_DETECTORS";
     private static final String ACTION_EVALUATE = "com.example.myapplication1.quiz.EVALUATE";
     private static final String ACTION_POSTPONE_CYCLE = "com.example.myapplication1.quiz.POSTPONE_CYCLE";
+    private static final String ACTION_QUESTION_ANSWERED = "com.example.myapplication1.quiz.QUESTION_ANSWERED";
     private static final int SERVICE_NOTIFICATION_ID = 1000;
     private static final int ALARM_REQUEST_CODE = 2;
 
@@ -99,6 +100,13 @@ public class QuizService extends Service {
         ContextCompat.startForegroundService(context, intent);
     }
 
+    /** The pending question was answered: the detectors start counting the spacing from now. */
+    public static void questionAnswered(Context context) {
+        if (!new QuizSettings(context).isMonitoringEnabled()) return;
+        Intent intent = new Intent(context, QuizService.class).setAction(ACTION_QUESTION_ANSWERED);
+        ContextCompat.startForegroundService(context, intent);
+    }
+
     /** Turns monitoring off for good (until the user turns it on again). */
     public static void stop(Context context) {
         new QuizSettings(context).setMonitoringEnabled(false);
@@ -125,9 +133,9 @@ public class QuizService extends Service {
         QuizCoordinator quiz = QuizCoordinator.getInstance(this);
         triggerManager = new TriggerManager(detectors, conditions, new MomentListener() {
             @Override
-            public void onMomentDetected(String reason) {
+            public boolean onMomentDetected(String reason) {
                 Log.d("TRIGGER", "Moment detected: " + reason);
-                quiz.onMomentDetected(reason);
+                return quiz.onMomentDetected(reason);   // true = a question was sent
             }
 
             @Override
@@ -157,6 +165,10 @@ public class QuizService extends Service {
 
         if (ACTION_POSTPONE_CYCLE.equals(action)) {
             triggerManager.postponeCycle();
+            return START_STICKY;
+        }
+        if (ACTION_QUESTION_ANSWERED.equals(action)) {
+            triggerManager.onQuestionAnswered();
             return START_STICKY;
         }
         if (ACTION_RESTART_DETECTORS.equals(action)) {

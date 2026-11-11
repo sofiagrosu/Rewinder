@@ -66,7 +66,7 @@
                     android:textColor="@color/blue_deep"
                     android:textSize="22sp"
                     android:textStyle="bold"
-                    tools:text="Acum e un moment bun" />
+                    tools:text="Now is a good time" />
 
                 <LinearLayout
                     android:id="@+id/checksContainer"
@@ -86,7 +86,7 @@
             android:layout_marginTop="16dp"
             android:textColor="@color/text_secondary"
             android:textSize="15sp"
-            tools:text="Ultima întrebare: la 13:40 (You stopped walking)" />
+            tools:text="Last question: at 1:40 PM (You stopped walking)" />
 
         <!-- feedback -->
         <com.google.android.material.card.MaterialCardView

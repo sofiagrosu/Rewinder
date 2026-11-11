@@ -23,7 +23,7 @@ import java.util.Locale;
  *
  * It is shown whenever a question is pending — so also when the app is opened by tapping
  * the notification — and hides when the question is answered (here, from the notification
- * or from the watch) or when its protection time runs out.
+ * or from the watch) or when it is withdrawn (bad moment, walking).
  *
  * Display only: an answer given here goes through QuizCoordinator.onAnswer, exactly like a
  * notification button, so the progress, the history and the result notification are the same.
@@ -115,9 +115,6 @@ public final class QuestionBanner implements QuizCoordinator.PendingListener {
         dontKnowButton.setVisibility(View.VISIBLE);
         okButton.setVisibility(View.GONE);
         card.setVisibility(View.VISIBLE);
-        // hides by itself when the protection time is over (the moment the notification disappears)
-        handler.removeCallbacks(expiryCheck);
-        handler.postDelayed(expiryCheck, coordinator.getPendingRemainingMillis() + 100);
     }
 
     private void answer(int option) {
