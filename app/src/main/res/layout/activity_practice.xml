@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    QUIZ: in-app practice set (PracticeActivity): 3 questions one after the other,
+    then a summary. Answers count for the daily goal and streak like notification answers.
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/practiceRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/practice_title"
+            android:textColor="@color/text_primary"
+            android:textSize="32sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtPracticeProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/text_secondary"
+            android:textSize="16sp" />
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/AppCard"
+            android:layout_marginTop="20dp"
+            app:cardBackgroundColor="@color/lavender_pale"
+            app:strokeWidth="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- subject while asking; "✓ Correct!" / "✗ The answer was: …" after answering -->
+                <TextView
+                    android:id="@+id/txtPracticeLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="0.05"
+                    android:textColor="@color/primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <!-- the question; the explanation after answering -->
+                <TextView
+                    android:id="@+id/txtPracticeText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textColor="@color/text_primary"
+                    android:textSize="18sp" />
+
+                <LinearLayout
+                    android:id="@+id/practiceOptions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="vertical">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPracticeOption1"
+                        style="@style/QuizOptionButton"
+                        android:layout_width="match_parent"
+                        android:layout_weight="0" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPracticeOption2"
+                        style="@style/QuizOptionButton"
+                        android:layout_width="match_parent"
+                        android:layout_marginTop="8dp"
+                        android:layout_weight="0" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPracticeOption3"
+                        style="@style/QuizOptionButton"
+                        android:layout_width="match_parent"
+                        android:layout_marginTop="8dp"
+                        android:layout_weight="0" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- "Next question" / "See results" / "Close" -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPracticeNext"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="20dp"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:backgroundTint="@color/primary"
+            app:cornerRadius="16dp" />
+    </LinearLayout>
+</ScrollView>
