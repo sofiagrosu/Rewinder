@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -9,7 +10,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.myapplication1"
+        applicationId = "com.rewinder"
         minSdk = 29   // Android 10: the oldest test phone
         targetSdk = 37
         versionCode = 1

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "761901717913",
+    "project_id": "rewinder-pmg26",
+    "storage_bucket": "rewinder-pmg26.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:761901717913:android:9e3ac0e8b5fc586e1d5b08",
+        "android_client_info": {
+          "package_name": "com.rewinder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8ToTTy9Q75krQPQwG8T-iX2VzB2uTve0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
