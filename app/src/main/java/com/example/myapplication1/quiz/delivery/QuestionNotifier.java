@@ -117,17 +117,22 @@ public class QuestionNotifier {
         notifySafely(QUESTION_NOTIFICATION_ID, builder);
     }
 
-    /** "Not a good time for questions?" with Yes / No, after a swipe on a question. */
+    /**
+     * "Is this a good time for questions?" with Yes / No, after a swipe on a question.
+     * Careful, the question is positive: Yes = good time (keep going), No = bad moment (pause).
+     */
     public void showBadMomentPrompt() {
         NotificationCompat.Builder builder = baseBuilder("Rewinder")
                 .setContentText(context.getString(R.string.quiz_bad_moment_title))
                 .setStyle(new NotificationCompat.BigTextStyle()
                         .bigText(context.getString(R.string.quiz_bad_moment_title)))
                 .setTimeoutAfter(PROMPT_VISIBLE_MILLIS)
+                // Yes, it is a good time → NOT a bad moment
                 .addAction(R.drawable.ic_option, context.getString(R.string.quiz_yes),
-                        badMomentIntent(true, REQUEST_BAD_YES))
+                        badMomentIntent(false, REQUEST_BAD_YES))
+                // No, it is not a good time → bad moment: pause
                 .addAction(R.drawable.ic_option, context.getString(R.string.quiz_no),
-                        badMomentIntent(false, REQUEST_BAD_NO));
+                        badMomentIntent(true, REQUEST_BAD_NO));
         notifySafely(PROMPT_NOTIFICATION_ID, builder);
     }
 

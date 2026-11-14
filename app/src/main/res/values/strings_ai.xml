@@ -14,7 +14,9 @@
     <string name="upload_err_pdf_read">Could not read this PDF.</string>
     <string name="upload_err_pdf_big">This PDF is too large (max 10 MB).</string>
     <string name="ai_err_network">Could not reach the question server. Check your internet connection and try again.</string>
-    <string name="ai_err_busy">The AI is busy right now. Wait a minute and try again.</string>
+    <string name="ai_err_busy">The AI service is overloaded or has reached its usage limit. Wait a minute and try again.</string>
+    <string name="ai_err_rate_limited">Too many requests in a short time. Wait a minute and try again.</string>
+    <string name="ai_err_unauthorized">The question server refused this app (the app key does not match the server).</string>
     <string name="ai_err_too_large">The material is too large. Use a shorter text or a smaller PDF.</string>
     <string name="ai_err_invalid">The AI did not return usable questions. Try again or use a clearer material.</string>
     <string name="ai_err_failed">Something went wrong while generating the questions.</string>

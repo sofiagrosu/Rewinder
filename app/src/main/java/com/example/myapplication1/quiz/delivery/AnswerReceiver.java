@@ -32,7 +32,7 @@ public class AnswerReceiver extends BroadcastReceiver {
 
         if (ACTION_BAD_MOMENT.equals(action)) {   // no question id in this one
             boolean bad = intent.getBooleanExtra(EXTRA_BAD_MOMENT, false);
-            Log.d("QUIZ", "Bad moment answer: " + (bad ? "yes" : "no"));
+            Log.d("QUIZ", "\"Is this a good time?\" answered: " + (bad ? "No (pause)" : "Yes"));
             QuizCoordinator.getInstance(context).onBadMoment(bad);
             return;
         }

@@ -236,6 +236,8 @@ public class UploadMaterialFragment extends Fragment {
         switch (kind) {
             case NETWORK: return R.string.ai_err_network;
             case BUSY: return R.string.ai_err_busy;
+            case RATE_LIMITED: return R.string.ai_err_rate_limited;
+            case UNAUTHORIZED: return R.string.ai_err_unauthorized;
             case TOO_LARGE: return R.string.ai_err_too_large;
             case INVALID_RESPONSE: return R.string.ai_err_invalid;
             default: return R.string.ai_err_failed;

@@ -3,7 +3,7 @@
 <resources>
     <string name="quiz_dont_know">I don\'t know</string>
     <string name="quiz_dont_know_headline">Not yet. The correct answer: %1$s</string>
-    <string name="quiz_bad_moment_title">Not a good time for questions?</string>
+    <string name="quiz_bad_moment_title">Is this a good time for questions?</string>
     <string name="quiz_yes">Yes</string>
     <string name="quiz_no">No</string>
     <string name="wn_motion_paused">Monitoring paused (busy calendar or quiet hours)</string>

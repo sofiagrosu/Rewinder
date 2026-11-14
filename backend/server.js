@@ -6,6 +6,10 @@
 // Start:
 // GEMINI_API_KEY=... APP_TOKEN=... node server.js
 //
+// Fallback models (optional): a comma-separated list, tried in order. When a model is busy
+// (429 quota / 5xx overloaded) or does not exist (404), the next one is used:
+// GEMINI_MODELS=first-model,backup-model GEMINI_API_KEY=... APP_TOKEN=... node server.js
+//
 // Endpoints:
 // GET  /health
 // POST /generate
@@ -20,7 +24,13 @@ const { normalizeAll, TYPES } = require("./validate");
 const PORT = process.env.PORT || 3000;
 const API_KEY = process.env.GEMINI_API_KEY;
 const APP_TOKEN = process.env.APP_TOKEN;
-const MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+// Models tried in order (GEMINI_MODELS), or a single model (GEMINI_MODEL, kept for compatibility).
+// Default: main model + lighter backup (valid Gemini API model ids, checked Nov 2026).
+const MODELS = (process.env.GEMINI_MODELS || process.env.GEMINI_MODEL || "gemini-3.6-flash,gemini-3.5-flash-lite")
+  .split(",")
+  .map((m) => m.trim())
+  .filter(Boolean);
+const MODEL = MODELS[0];   // the main model (shown by /health and at start-up)
 
 const MAX_BODY = 14 * 1024 * 1024;
 const MAX_TEXT_CHARS = 60000;
@@ -195,38 +205,17 @@ function wait(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function callGemini(params, text, pdfBase64) {
-  const parts = [
-    {
-      text: buildPrompt({
-        ...params,
-        hasText: !!text,
-      }),
-    },
-  ];
-
-  if (text) {
-    parts.push({
-      text: "STUDY MATERIAL:\n" + text,
-    });
-  }
-
-  if (pdfBase64) {
-    parts.push({
-      inline_data: {
-        mime_type: "application/pdf",
-        data: pdfBase64,
-      },
-    });
-  }
-
+// One model, with automatic retries for temporary errors. Returns the OK response or throws
+// an Error with .code ("AI_BUSY" = may work later / with another model, "AI_FAILED") and .status.
+async function requestGemini(model, parts) {
   let response;
+  // With fallback models, fewer retries per model, so the user does not wait too long.
+  const attempts = MODELS.length > 1 ? 2 : 3;
 
-  // Initial request + maximum 2 automatic retries.
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  for (let attempt = 1; attempt <= attempts; attempt++) {
     try {
       response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
         {
           method: "POST",
 
@@ -255,8 +244,8 @@ async function callGemini(params, text, pdfBase64) {
       );
     } catch (error) {
       // Retry network errors and timeouts too.
-      if (attempt === 3) {
-        console.error("Gemini connection failed:", error.message);
+      if (attempt === attempts) {
+        console.error(`Gemini connection failed (${model}):`, error.message);
 
         const e = new Error("Gemini connection failed");
         e.code = "AI_FAILED";
@@ -266,7 +255,7 @@ async function callGemini(params, text, pdfBase64) {
       const delay = 2000 * Math.pow(2, attempt - 1);
 
       console.log(
-        `Gemini connection error. Retry ${attempt + 1}/3 in ${delay} ms.`
+        `Gemini (${model}) connection error. Retry ${attempt + 1}/${attempts} in ${delay} ms.`
       );
 
       await wait(delay);
@@ -283,11 +272,11 @@ async function callGemini(params, text, pdfBase64) {
 
     const retryable = retryableStatuses.includes(response.status);
 
-    if (!retryable || attempt === 3) {
+    if (!retryable || attempt === attempts) {
       const errorText = await response.text();
 
       console.error(
-        "Gemini error",
+        `Gemini error (${model})`,
         response.status,
         errorText.slice(0, 500)
       );
@@ -295,6 +284,7 @@ async function callGemini(params, text, pdfBase64) {
       const e = new Error("Gemini error " + response.status);
 
       e.code = retryable ? "AI_BUSY" : "AI_FAILED";
+      e.status = response.status;
 
       throw e;
     }
@@ -310,11 +300,56 @@ async function callGemini(params, text, pdfBase64) {
         : 2000 * Math.pow(2, attempt - 1);
 
     console.log(
-      `Gemini returned ${response.status}. Retry ${attempt + 1}/3 in ${delay} ms.`
+      `Gemini (${model}) returned ${response.status}. Retry ${attempt + 1}/${attempts} in ${delay} ms.`
     );
 
     await wait(delay);
   }
+
+  return response;
+}
+
+async function callGemini(params, text, pdfBase64) {
+  const parts = [
+    {
+      text: buildPrompt({
+        ...params,
+        hasText: !!text,
+      }),
+    },
+  ];
+
+  if (text) {
+    parts.push({
+      text: "STUDY MATERIAL:\n" + text,
+    });
+  }
+
+  if (pdfBase64) {
+    parts.push({
+      inline_data: {
+        mime_type: "application/pdf",
+        data: pdfBase64,
+      },
+    });
+  }
+
+  // Try each model in order; move on to the next one when the current one is busy or missing.
+  let response;
+  let lastError;
+  for (const model of MODELS) {
+    try {
+      response = await requestGemini(model, parts);
+      if (model !== MODELS[0]) console.log(`Used fallback model ${model}.`);
+      break;
+    } catch (e) {
+      lastError = e;
+      const tryNext = e.code === "AI_BUSY" || e.status === 404;
+      if (!tryNext || model === MODELS[MODELS.length - 1]) throw e;
+      console.log(`Model ${model} failed (${e.code}, HTTP ${e.status || "-"}). Trying the next model.`);
+    }
+  }
+  if (!response) throw lastError;
 
   const data = await response.json();
 
@@ -338,6 +373,7 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, {
         ok: true,
         model: MODEL,
+        models: MODELS,
       });
     }
 
@@ -478,6 +514,6 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, "0.0.0.0", () => {
   console.log(
-    `Rewinder backend on :${PORT}, model ${MODEL}`
+    `Rewinder backend on :${PORT}, models: ${MODELS.join(" → ")}`
   );
 });

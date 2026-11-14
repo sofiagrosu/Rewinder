@@ -177,22 +177,23 @@ public final class QuizCoordinator {
     /**
      * Called by AnswerReceiver when the user swipes the question away.
      * While the user is on a break the question cannot be removed: it comes back silently, and
-     * the "bad moment?" prompt appears. Only "bad moment → Yes" (or walking) takes it away.
+     * the "bad moment?" prompt appears. Only "good time? → No" (or walking) takes it away.
      */
     public void onDismissed(long questionId) {
         if (questionId != pendingQuestionId) return;   // an old question, nothing to do
         Question question = repository.getQuestion(questionId);
         if (question == null) return;
         notifier.showQuestion(question, getSubjectTitle(question.getSubjectId()), pendingReason, true, 0);
-        notifier.showBadMomentPrompt();   // "Not a good time for questions?"
+        notifier.showBadMomentPrompt();   // "Is this a good time for questions?"
         Log.d(TAG, "Question " + questionId + " swiped: shown again + bad-moment prompt");
     }
 
     /**
-     * Called by AnswerReceiver: the answer to "Not a good time for questions?".
-     *   Yes → the question is removed (saved as ignored) and the set is skipped:
+     * Called by AnswerReceiver: the answer to "Is this a good time for questions?".
+     * @param bad true when the user answered No (it is NOT a good time).
+     *   No  → the question is removed (saved as ignored) and the set is skipped:
      *        the next question comes after the 15-minute pause.
-     *   No → nothing changes: the question stays until it is answered.
+     *   Yes → nothing changes: the question stays until it is answered.
      */
     public void onBadMoment(boolean bad) {
         notifier.cancelPrompt();

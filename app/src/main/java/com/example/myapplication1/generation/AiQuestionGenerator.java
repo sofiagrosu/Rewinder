@@ -109,7 +109,11 @@ public class AiQuestionGenerator implements QuestionGenerator {
 
     private static GenerationException.Kind kindFor(int status, String code) {
         if (status == 413 || "TOO_LARGE".equals(code)) return GenerationException.Kind.TOO_LARGE;
-        if (status == 429 || status == 503 || "RATE_LIMITED".equals(code) || "AI_BUSY".equals(code)) {
+        // our server's own per-phone limit (checked first: it is also HTTP 429)
+        if ("RATE_LIMITED".equals(code)) return GenerationException.Kind.RATE_LIMITED;
+        if (status == 401 || "UNAUTHORIZED".equals(code)) return GenerationException.Kind.UNAUTHORIZED;
+        // Gemini busy / out of quota (the server already tried the fallback models)
+        if ("AI_BUSY".equals(code) || status == 429 || status == 503) {
             return GenerationException.Kind.BUSY;
         }
         if ("AI_INVALID".equals(code)) return GenerationException.Kind.INVALID_RESPONSE;
