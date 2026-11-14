@@ -11,7 +11,7 @@ public class Subject {
 
     private final long id;
     private final String name;      // "Algoritmi"
-    private final String topic;     // "Sortare și căutare"
+    private final String topic;     // "Sorting and searching"
     private final LocalDate examDate; // may be null (no exam set)
 
     public Subject(long id, String name, String topic, LocalDate examDate) {
@@ -38,7 +38,7 @@ public class Subject {
         return examDate;
     }
 
-    /** "Algoritmi · Sortare și căutare" - the way it is shown on screen. */
+    /** "Algorithms · Sorting and searching" - the way it is shown on screen. */
     public String getTitle() {
         if (topic == null || topic.isEmpty()) return name;
         return name + " \u00B7 " + topic;

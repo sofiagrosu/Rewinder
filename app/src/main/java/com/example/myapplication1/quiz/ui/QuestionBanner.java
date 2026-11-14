@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat;
 import com.example.myapplication1.R;
 import com.example.myapplication1.data.Question;
 import com.example.myapplication1.quiz.QuizCoordinator;
+import com.example.myapplication1.quiz.delivery.AnswerReceiver;
 import com.example.myapplication1.quiz.delivery.QuestionNotifier;
 
 import java.util.Locale;
@@ -21,8 +22,8 @@ import java.util.Locale;
  * with its option buttons, and afterwards the result (✓ / ✗ + explanation + OK).
  *
  * It is shown whenever a question is pending — so also when the app is opened by tapping
- * the notification — and hides when the question is answered (here, from the notification,
- * from the watch or in a practice set).
+ * the notification — and hides when the question is answered (here, from the notification
+ * or from the watch) or when it is withdrawn (bad moment, walking).
  *
  * Display only: an answer given here goes through QuizCoordinator.onAnswer, exactly like a
  * notification button, so the progress, the history and the result notification are the same.
@@ -39,6 +40,7 @@ public final class QuestionBanner implements QuizCoordinator.PendingListener {
     private final View optionsRow;
     private final Button[] optionButtons;
     private final Button okButton;
+    private final Button dontKnowButton;
 
     private final QuizCoordinator coordinator;
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -58,12 +60,14 @@ public final class QuestionBanner implements QuizCoordinator.PendingListener {
                 bannerView.findViewById(R.id.btnOption2),
                 bannerView.findViewById(R.id.btnOption3)};
         okButton = bannerView.findViewById(R.id.btnBannerOk);
+        dontKnowButton = bannerView.findViewById(R.id.btnDontKnow);
         coordinator = QuizCoordinator.getInstance(bannerView.getContext());
 
         for (int i = 0; i < optionButtons.length; i++) {
             final int option = i + 1;              // buttons are 0-based, options 1-based
             optionButtons[i].setOnClickListener(v -> answer(option));
         }
+        dontKnowButton.setOnClickListener(v -> answer(AnswerReceiver.OPTION_DONT_KNOW));
         okButton.setOnClickListener(v -> hide());
     }
 
@@ -108,6 +112,7 @@ public final class QuestionBanner implements QuizCoordinator.PendingListener {
             if (exists) optionButtons[i].setText(question.getOption(option));
         }
         optionsRow.setVisibility(View.VISIBLE);
+        dontKnowButton.setVisibility(View.VISIBLE);
         okButton.setVisibility(View.GONE);
         card.setVisibility(View.VISIBLE);
     }
@@ -115,22 +120,26 @@ public final class QuestionBanner implements QuizCoordinator.PendingListener {
     private void answer(int option) {
         Question question = coordinator.getPendingQuestion();
         if (question == null || question.getId() != shownQuestionId) {
-            hide();                                // already answered elsewhere
+            hide();                                // expired or already answered elsewhere
             return;
         }
-        boolean correct = question.isCorrect(option);
+        boolean dontKnow = option == AnswerReceiver.OPTION_DONT_KNOW;
+        boolean correct = !dontKnow && question.isCorrect(option);
         coordinator.onAnswer(question.getId(), option);   // same path as the notification buttons
-        showResult(question, correct);
+        showResult(question, correct, dontKnow);
     }
 
-    private void showResult(Question question, boolean correct) {
+    private void showResult(Question question, boolean correct, boolean dontKnow) {
         showingResult = true;
         handler.removeCallbacks(expiryCheck);
-        label.setText(QuestionNotifier.resultHeadline(question, correct));
+        label.setText(dontKnow
+                ? QuestionNotifier.dontKnowHeadline(card.getContext(), question)
+                : QuestionNotifier.resultHeadline(question, correct));
         label.setTextColor(color(correct ? R.color.primary : R.color.danger));
         reason.setVisibility(View.GONE);
         setOptionalText(text, question.getExplanation());
         optionsRow.setVisibility(View.GONE);
+        dontKnowButton.setVisibility(View.GONE);
         okButton.setVisibility(View.VISIBLE);
     }
 

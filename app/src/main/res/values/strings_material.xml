@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Texts of the Subjects, Upload material and Review screens.
+    Separate file on purpose: no merge conflicts with the other strings files.
+ -->
+<resources>
+    <!--  ===== Subjects =====  -->
+    <string name="subjects_title">My Subjects</string>
+    <string name="subjects_empty">You don\'t have any subjects yet. Add your first material and the app will turn it into short questions.</string>
+    <string name="subjects_add_material">Add material</string>
+    <string name="subject_exam_format">Exam: %1$s</string>
+    <string name="subject_sub_format">%1$s · %2$s</string>
+
+    <!--  ===== Upload material =====  -->
+    <string name="upload_title">Upload material</string>
+    <string name="upload_back">Back</string>
+    <string name="upload_subject_hint">Subject (e.g. Anatomy)</string>
+    <string name="upload_chapter_hint">Chapter (e.g. Brachial plexus)</string>
+    <string name="upload_text_hint">Paste your notes here…</string>
+    <string name="upload_question_types">Question types</string>
+    <string name="type_true_false">True / False</string>
+    <string name="type_two_options">Two options</string>
+    <string name="type_missing_word">Missing word</string>
+    <string name="upload_must_check">Generated questions must be reviewed by you before entering rotation.</string>
+    <string name="upload_generate">Generate questions</string>
+    <string name="upload_err_subject">Please enter the subject name.</string>
+    <string name="upload_err_text">Please paste a longer text (at least 40 characters).</string>
+    <string name="upload_err_types">Choose at least one question type.</string>
+    <string name="upload_err_nothing">No suitable sentences found. Use complete sentences of 6–35 words.</string>
+
+    <!--  ===== Review =====  -->
+    <string name="review_title">Verification</string>
+    <string name="review_count_format">%1$d questions to review</string>
+    <string name="review_warning">Check each answer. Auto-generated questions may contain mistakes.</string>
+    <string name="review_answer_format">Answer: %1$s</string>
+    <string name="review_empty">No more questions to review.</string>
+    <string name="review_approve_all">Approve all</string>
+    <string name="review_cancel">Cancel</string>
+    <string name="review_edit">Edit</string>
+    <string name="review_delete">Delete</string>
+    <string name="review_approved_format">%1$s added to rotation</string>
+    <string name="edit_title">Edit question</string>
+    <string name="edit_question_hint">Question</string>
+    <string name="edit_option_hint">Option %1$d</string>
+    <string name="edit_correct">correct</string>
+    <string name="edit_save">Save</string>
+    <string name="edit_err_empty">Please fill in the question and options.</string>
+    <string name="type_label_true_false">True / False</string>
+    <string name="type_label_two_options">Two options</string>
+    <string name="type_label_missing_word">Missing word</string>
+</resources>

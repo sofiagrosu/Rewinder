@@ -7,6 +7,12 @@
     <string name="qs_title">Settings</string>
     <string name="qs_subtitle">Temporary screen for testing the quiz</string>
 
+    <string name="qs_monitoring_title">Monitoring</string>
+    <string name="qs_monitoring_description">Rewinder watches for breaks and sends questions. Turn off to stop completely, also after a restart.</string>
+
+    <string name="qs_goal_title">Daily goal</string>
+    <string name="qs_goal_description">How many questions you want to answer each day. Home shows your progress.</string>
+
     <string name="qs_quiet_title">Quiet hours</string>
     <string name="qs_quiet_description">No questions during these hours, e.g. while you sleep.</string>
     <string name="qs_from">From %1$s</string>

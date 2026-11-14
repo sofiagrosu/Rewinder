@@ -22,7 +22,7 @@
             android:textColor="@color/text_primary"
             android:textSize="32sp"
             android:textStyle="bold"
-            tools:text="Bună ziua" />
+            tools:text="Good afternoon" />
 
         <TextView
             android:id="@+id/txtSolvedToday"
@@ -31,7 +31,7 @@
             android:layout_marginTop="4dp"
             android:textColor="@color/text_secondary"
             android:textSize="16sp"
-            tools:text="Azi ai rezolvat 14 întrebări" />
+            tools:text="Today you answered 14 questions" />
 
         <!-- ===== Daily goal ===== -->
         <com.google.android.material.card.MaterialCardView
@@ -128,7 +128,7 @@
                         android:textColor="@color/text_primary"
                         android:textSize="28sp"
                         android:textStyle="bold"
-                        tools:text="6 zile" />
+                        tools:text="6 days" />
 
                     <TextView
                         android:layout_width="wrap_content"

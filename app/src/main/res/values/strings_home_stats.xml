@@ -1,58 +1,83 @@
 <!--
-    Texts of the Home and Stats screens (person A).
+    Texts of the Home and Stats screens (person A). All texts in English.
     Kept in a separate file so it does not collide with teammates' strings.xml edits.
  -->
 <resources>
     <!--  ===== Home =====  -->
-    <string name="greeting_morning">Bună dimineața</string>
-    <string name="greeting_day">Bună ziua</string>
-    <string name="greeting_evening">Bună seara</string>
-    <string name="solved_today">Azi ai rezolvat %1$s</string>
-    <string name="daily_goal">Obiectiv zilnic</string>
+    <string name="greeting_morning">Good morning</string>
+    <string name="greeting_day">Good afternoon</string>
+    <string name="greeting_evening">Good evening</string>
+    <string name="solved_today">Today you answered %1$s</string>
+    <string name="daily_goal">Daily goal</string>
     <string name="goal_format">%1$d / %2$d</string>
-    <string name="daily_streak">Serie zilnică</string>
-    <string name="accuracy_today">Reușită azi</string>
+    <string name="daily_streak">Daily streak</string>
+    <string name="accuracy_today">Accuracy today</string>
     <string name="percent_format">%1$d%%</string>
     <string name="no_percent">–</string>
-    <string name="next_free_moment">Următorul moment liber estimat</string>
+    <string name="next_free_moment">Next estimated free moment</string>
     <string name="moment_time">~13:40</string>
-    <string name="moment_description">Pauză după curs: calendarul e liber.</string>
-    <string name="why_now">De ce acum?</string>
-    <string name="active_subjects">Materii active</string>
-    <string name="in_rotation">%1$s în rotație</string>
-    <string name="upload_material">Încarcă material</string>
-    <string name="toast_why_now">Aici se va deschide ecranul „De ce acum?”</string>
-    <string name="toast_upload">Aici se va deschide ecranul „Încarcă material”</string>
+    <string name="moment_description">Break after class: your calendar is free.</string>
+    <string name="why_now">Why now?</string>
+    <string name="active_subjects">Active subjects</string>
+    <string name="in_rotation">%1$s in rotation</string>
+    <string name="upload_material">Upload material</string>
     <!--  ===== Stats =====  -->
-    <string name="stats_title">Statistici</string>
-    <string name="stats_subtitle">Ultimele 7 zile</string>
-    <string name="success_rate">Procent de reușită</string>
-    <string name="good_moments_format">Momente bune: %1$d%%</string>
-    <string name="good_moments_none">Momente bune: –</string>
-    <string name="questions_per_day">Întrebări pe zi</string>
-    <string name="weakest_subjects">Materiile cele mai slabe</string>
-    <string name="weak_empty">Încă nu ai răspuns la nicio întrebare.</string>
+    <string name="stats_title">Stats</string>
+    <string name="stats_subtitle">Last 7 days</string>
+    <string name="success_rate">Success rate</string>
+    <string name="good_moments_format">Good moments: %1$d%%</string>
+    <string name="good_moments_none">Good moments: –</string>
+    <string name="questions_per_day">Questions per day</string>
+    <string name="weakest_subjects">Weakest subjects</string>
+    <string name="counts_format">Answers: %1$d · correct %2$d · wrong %3$d</string>
+    <string name="ignored_format">Ignored questions: %1$d</string>
+    <string name="response_rate_format">Response rate: %1$d%%</string>
+    <string name="response_rate_none">Response rate: –</string>
+    <string name="weak_empty">You haven\'t answered any questions yet.</string>
+    <!--  ===== De ce acum? =====  -->
+    <string name="wn_title">Why now?</string>
+    <string name="wn_state_label">Your state right now</string>
+    <string name="wn_verdict_good">Now is a good time</string>
+    <string name="wn_verdict_bad">Now is not a good time</string>
+    <string name="wn_motion_still">You\'ve been still for %1$s</string>
+    <string name="wn_motion_walking">You walked recently; waiting for one minute without steps</string>
+    <string name="wn_motion_waiting">You haven\'t been still for a minute yet</string>
+    <string name="wn_motion_unknown">Can\'t track steps (missing permission or sensor)</string>
+    <string name="wn_quiet_off">Quiet hours are off</string>
+    <string name="wn_quiet_in">Quiet hours, until %1$s</string>
+    <string name="wn_quiet_out">Outside quiet hours</string>
+    <string name="wn_calendar_off">Calendar is not used</string>
+    <string name="wn_calendar_no_permission">Calendar: permission missing, not checked</string>
+    <string name="wn_calendar_busy">Calendar busy, until %1$s</string>
+    <string name="wn_calendar_free">Calendar free</string>
+    <string name="wn_last_none">No question has been sent yet.</string>
+    <string name="wn_last_format">Last question: at %1$s (%2$s)</string>
+    <string name="wn_was_good">Was it a good time?</string>
+    <string name="wn_yes">Yes</string>
+    <string name="wn_no">No</string>
+    <string name="wn_thanks">Thanks for your answer</string>
+    <string name="wn_back">Back</string>
     <!--  ===== Temporary screens =====  -->
-    <string name="placeholder_coming_soon">%1$s: în lucru</string>
+    <string name="placeholder_coming_soon">%1$s: coming soon</string>
     <!--  ===== Romanian plurals: {one, few, other}. See util/RoPlural.java =====  -->
     <string-array name="plural_questions">
-        <item>%d întrebare</item>
-        <item>%d întrebări</item>
-        <item>%d de întrebări</item>
+        <item>%d question</item>
+        <item>%d questions</item>
+        <item>%d questions</item>
     </string-array>
     <string-array name="plural_days">
-        <item>%d zi</item>
-        <item>%d zile</item>
-        <item>%d de zile</item>
+        <item>%d day</item>
+        <item>%d days</item>
+        <item>%d days</item>
     </string-array>
     <!--  Monday ... Sunday  -->
     <string-array name="weekday_initials">
-        <item>L</item>
         <item>M</item>
-        <item>M</item>
-        <item>J</item>
-        <item>V</item>
+        <item>T</item>
+        <item>W</item>
+        <item>T</item>
+        <item>F</item>
         <item>S</item>
-        <item>D</item>
+        <item>S</item>
     </string-array>
 </resources>

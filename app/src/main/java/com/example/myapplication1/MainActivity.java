@@ -15,6 +15,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.example.myapplication1.home.HomeFragment;
 import com.example.myapplication1.quiz.QuizService;
@@ -23,6 +24,7 @@ import com.example.myapplication1.quiz.settings.QuizSettingsFragment;
 import com.example.myapplication1.quiz.delivery.QuizNotifications;
 import com.example.myapplication1.quiz.ui.QuestionBanner;
 import com.example.myapplication1.stats.StatsFragment;
+import com.example.myapplication1.subjects.SubjectsFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.List;
@@ -81,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
         bottomNav.setOnItemSelectedListener(item -> {
             Fragment fragment = fragmentFor(item.getItemId());
             if (fragment == null) return false;
+            closeSubScreens();   // a tab tap also closes Upload/Review screens opened on top
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.fragmentContainer, fragment)
@@ -119,12 +122,29 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
     }
 
+    /**
+     * Opens a screen that is NOT a tab (Upload material, Review) on top of the current tab.
+     * It is added to the back stack, so the system Back button returns to the previous screen.
+     */
+    public void openScreen(Fragment fragment) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack(null)
+                .commit();
+    }
+
+    /** Closes every screen opened with openScreen() and shows the tab below again. */
+    public void closeSubScreens() {
+        getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+    }
+
     /** Which fragment belongs to which tab. (if/else, because R.id values are not constants.) */
     private Fragment fragmentFor(int menuItemId) {
         if (menuItemId == R.id.nav_home) {
             return new HomeFragment();
         } else if (menuItemId == R.id.nav_subjects) {
-            return PlaceholderFragment.newInstance(getString(R.string.nav_subjects));   // TODO SubjectsFragment
+            return new SubjectsFragment();
         } else if (menuItemId == R.id.nav_stats) {
             return new StatsFragment();
         } else if (menuItemId == R.id.nav_settings) {

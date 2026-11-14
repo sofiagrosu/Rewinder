@@ -31,7 +31,32 @@ public class TriggerManager {
         running = true;
         this.context = context.getApplicationContext();
         for (MomentDetector detector : detectors) {
-            detector.start(this.context, this::onDetectorSignal);
+            detector.start(this.context, new MomentListener() {
+                @Override
+                public boolean onMomentDetected(String reason) {
+                    return onDetectorSignal(reason);
+                }
+
+                @Override
+                public void onWalkingStarted() {
+                    listener.onWalkingStarted();   // not a "moment": no condition can veto it
+                }
+            });
+        }
+    }
+
+    /** Passes "the question was answered" on to the detectors (spacing counts from the answer). */
+    public void onQuestionAnswered() {
+        if (!running) return;
+        for (MomentDetector detector : detectors) {
+            detector.onQuestionAnswered();
+        }
+    }
+
+    /** Passes "bad moment, try later" on to the detectors. */
+    public void postponeCycle() {
+        for (MomentDetector detector : detectors) {
+            detector.postponeCycle();
         }
     }
 
@@ -40,14 +65,6 @@ public class TriggerManager {
         running = false;
         for (MomentDetector detector : detectors) {
             detector.stop();
-        }
-    }
-
-    /** Tells every detector that the pending question was answered (see BreakDetector). */
-    public void onQuestionAnswered() {
-        if (!running) return;
-        for (MomentDetector detector : detectors) {
-            detector.onQuestionAnswered();
         }
     }
 

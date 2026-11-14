@@ -19,13 +19,15 @@ import com.example.myapplication1.data.Question;
 
 /**
  * Builds and shows the quiz notifications:
- *   - the question, with one button per option (max 3 → also fits on the watch)
+ *   - the question, with one button per option and "Nu știu" (max 3 buttons in total, so it also
+ *     fits on the watch: questions with 3 options have no "Nu știu" here, only in the app banner)
  *   - the result after answering (✓ / ✗ + explanation), replacing the question
- * The question can't be swiped away for good during its protection time:
- * if it is, the coordinator shows it again (see QuizCoordinator.onDismissed).
+ *   - after a swipe on the first question of a set: "Este un moment nepotrivit pentru întrebări?"
+ * A swipe closes the question for good (QuizCoordinator.onDismissed marks it as ignored).
  *
  * WATCH: phone notifications are bridged to a paired Wear OS watch automatically, with the same
- * NotificationCompat APIs, so there is no separate watch code. What shapes the look on the watch:
+ * NotificationCompat APIs, so there is no separate watch code. Cancelling a notification here
+ * removes it from the watch too. What shapes the look on the watch:
  *   - BigTextStyle = the Wear "Big text" template: short preview in the stream, full text when
  *     tapped, the action buttons stacked under it (max 3), plus an automatic "Open on phone";
  *   - action icons: the watch shows each button as a chip with icon + label (R.drawable.ic_option);
@@ -37,7 +39,15 @@ public class QuestionNotifier {
 
     /** One quiz notification at a time: a new question replaces the previous one. */
     public static final int QUESTION_NOTIFICATION_ID = 1001;
+    /** "Bad moment?" has its own id, so it does not replace a question. */
+    public static final int PROMPT_NOTIFICATION_ID = 1002;
+
     private static final long RESULT_VISIBLE_MILLIS = 15_000;   // result disappears after 15 s
+    private static final long PROMPT_VISIBLE_MILLIS = 2 * 60_000;
+
+    // request codes of the "bad moment" buttons (far from questionId * 10 + n used below)
+    private static final int REQUEST_BAD_YES = 1_000_000_001;
+    private static final int REQUEST_BAD_NO = 1_000_000_002;
 
     private final Context context;
 
@@ -47,11 +57,12 @@ public class QuestionNotifier {
 
     /**
      * Shows the question with its answer buttons.
-     * It stays until the question is answered: no timeout, and if it is swiped away
-     * QuizCoordinator.onDismissed shows it again.
-     * @param silent true when re-showing after a swipe (no sound, no pop-up)
+     * @param silent        true for a quiet re-show (no sound, no pop-up)
+     * @param timeoutMillis the notification disappears by itself after this time if unanswered;
+     *                      0 = it stays until it is answered (what QuizCoordinator uses)
      */
-    public void showQuestion(Question question, String title, String reason, boolean silent) {
+    public void showQuestion(Question question, String title, String reason,
+                             boolean silent, long timeoutMillis) {
         NotificationCompat.Builder builder = baseBuilder(title)
                 .setContentText(question.getText())
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(question.getText()))
@@ -59,18 +70,19 @@ public class QuestionNotifier {
                 .setAutoCancel(false)                        // tapping the text opens the app, question stays
                 .setSilent(silent)
                 .setDeleteIntent(dismissIntent(question.getId()));   // told when the user swipes it away
+        if (timeoutMillis > 0) builder.setTimeoutAfter(timeoutMillis);
 
         for (int n = 1; n <= question.getOptionCount(); n++) {
             // the icon is only drawn on the watch (phones ignore action icons since Android 7)
             builder.addAction(R.drawable.ic_option, question.getOption(n),
                     answerIntent(question.getId(), n));
         }
-        notifySafely(builder);
-    }
-
-    /** Removes the quiz notification (e.g. the question was answered inside the app). */
-    public void cancel() {
-        NotificationManagerCompat.from(context).cancel(QUESTION_NOTIFICATION_ID);
+        // Android shows at most 3 buttons: "Nu știu" only fits next to 2 options.
+        if (question.getOptionCount() <= 2) {
+            builder.addAction(R.drawable.ic_option, context.getString(R.string.quiz_dont_know),
+                    answerIntent(question.getId(), AnswerReceiver.OPTION_DONT_KNOW));
+        }
+        notifySafely(QUESTION_NOTIFICATION_ID, builder);
     }
 
     /**
@@ -78,9 +90,16 @@ public class QuestionNotifier {
      * Collapsed: just the ✓/✗ headline. Expanded (phone) / tapped (watch): headline,
      * explanation and, last, the stats line (built by QuizCoordinator from StatsCalculator).
      */
-    public void showResult(Question question, String title, boolean correct,
-                           String statsLine) {
-        String headline = resultHeadline(question, correct);
+    public void showResult(Question question, String title, boolean correct, String statsLine) {
+        showOutcome(question, title, resultHeadline(question, correct), statsLine);
+    }
+
+    /** "I don't know": shows the correct answer and the short explanation paragraph. */
+    public void showDontKnow(Question question, String title, String statsLine) {
+        showOutcome(question, title, dontKnowHeadline(context, question), statsLine);
+    }
+
+    private void showOutcome(Question question, String title, String headline, String statsLine) {
         String body = headline;
         String explanation = question.getExplanation();
         if (explanation != null && !explanation.isEmpty()) {
@@ -95,7 +114,30 @@ public class QuestionNotifier {
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(body))
                 .setOnlyAlertOnce(true)
                 .setTimeoutAfter(RESULT_VISIBLE_MILLIS);
-        notifySafely(builder);
+        notifySafely(QUESTION_NOTIFICATION_ID, builder);
+    }
+
+    /** "Not a good time for questions?" with Yes / No, after a swipe on a question. */
+    public void showBadMomentPrompt() {
+        NotificationCompat.Builder builder = baseBuilder("Rewinder")
+                .setContentText(context.getString(R.string.quiz_bad_moment_title))
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText(context.getString(R.string.quiz_bad_moment_title)))
+                .setTimeoutAfter(PROMPT_VISIBLE_MILLIS)
+                .addAction(R.drawable.ic_option, context.getString(R.string.quiz_yes),
+                        badMomentIntent(true, REQUEST_BAD_YES))
+                .addAction(R.drawable.ic_option, context.getString(R.string.quiz_no),
+                        badMomentIntent(false, REQUEST_BAD_NO));
+        notifySafely(PROMPT_NOTIFICATION_ID, builder);
+    }
+
+    /** Removes the question from the phone and from the watch (e.g. the user started walking). */
+    public void cancelQuestion() {
+        NotificationManagerCompat.from(context).cancel(QUESTION_NOTIFICATION_ID);
+    }
+
+    public void cancelPrompt() {
+        NotificationManagerCompat.from(context).cancel(PROMPT_NOTIFICATION_ID);
     }
 
     /** "✓ Correct!" or "✗ The answer was: ..." — used by the notification and by the in-app banner. */
@@ -103,6 +145,12 @@ public class QuestionNotifier {
         return correct
                 ? "✓ Correct!"
                 : "✗ The answer was: " + question.getOption(question.getCorrectOption());
+    }
+
+    /** "Not yet. The correct answer: ..." — used by the notification and by the in-app banner. */
+    public static String dontKnowHeadline(Context context, Question question) {
+        return context.getString(R.string.quiz_dont_know_headline,
+                question.getOption(question.getCorrectOption()));
     }
 
     // ---------------------------------------------------------------------------------
@@ -126,7 +174,7 @@ public class QuestionNotifier {
         intent.putExtra(AnswerReceiver.EXTRA_QUESTION_ID, questionId);
         intent.putExtra(AnswerReceiver.EXTRA_OPTION, option);
         // a different requestCode per button, otherwise Android would reuse one PendingIntent for all
-        int requestCode = (int) (questionId * 10 + option);
+        int requestCode = (int) (questionId * 10 + option);   // option 0..3
         return PendingIntent.getBroadcast(context, requestCode, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
@@ -136,7 +184,15 @@ public class QuestionNotifier {
         Intent intent = new Intent(context, AnswerReceiver.class);
         intent.setAction(AnswerReceiver.ACTION_DISMISSED);
         intent.putExtra(AnswerReceiver.EXTRA_QUESTION_ID, questionId);
-        int requestCode = (int) (questionId * 10);   // option buttons use *10 + 1..3, so no clash
+        int requestCode = (int) (questionId * 10 + 9);   // answer buttons use *10 + 0..3, so no clash
+        return PendingIntent.getBroadcast(context, requestCode, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+    }
+
+    private PendingIntent badMomentIntent(boolean bad, int requestCode) {
+        Intent intent = new Intent(context, AnswerReceiver.class);
+        intent.setAction(AnswerReceiver.ACTION_BAD_MOMENT);
+        intent.putExtra(AnswerReceiver.EXTRA_BAD_MOMENT, bad);
         return PendingIntent.getBroadcast(context, requestCode, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
@@ -148,12 +204,12 @@ public class QuestionNotifier {
     }
 
     @SuppressLint("MissingPermission")   // checked in canNotify()
-    private void notifySafely(NotificationCompat.Builder builder) {
+    private void notifySafely(int id, NotificationCompat.Builder builder) {
         if (!canNotify()) {
             Log.w("QUIZ", "Notifications not allowed, nothing shown");
             return;
         }
-        NotificationManagerCompat.from(context).notify(QUESTION_NOTIFICATION_ID, builder.build());
+        NotificationManagerCompat.from(context).notify(id, builder.build());
     }
 
     /**

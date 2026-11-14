@@ -1,0 +1,9 @@
+{
+  "name": "rewinder-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Proxy between the Rewinder Android app and the Gemini API (keeps the API key off the phone)",
+  "main": "server.js",
+  "scripts": { "start": "node server.js", "test": "node test.js" },
+  "engines": { "node": ">=18" }
+}

@@ -13,10 +13,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.myapplication1.MainActivity;
 import com.example.myapplication1.R;
 import com.example.myapplication1.data.RepositoryProvider;
+import com.example.myapplication1.quiz.settings.QuizSettings;
 import com.example.myapplication1.quiz.ui.PracticeActivity;
+import com.example.myapplication1.quiz.whynow.WhyNowFragment;
 import com.example.myapplication1.stats.StatsCalculator;
+import com.example.myapplication1.upload.UploadMaterialFragment;
 import com.example.myapplication1.util.RoPlural;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
@@ -25,14 +29,12 @@ import java.time.LocalTime;
 import java.util.List;
 
 /**
- * Home ("Acasă"). XML (fragment_home.xml) says HOW it looks;
+ * Home. XML (fragment_home.xml) says HOW it looks;
  * this class says WHAT data appears and WHAT happens on taps.
  * All numbers come from the repository through StatsCalculator.
  */
 public class HomeFragment extends Fragment {
 
-    // TODO: will come from Settings ("Limită zilnică") when that screen exists.
-    private static final int DAILY_GOAL = 20;
     private static final int ACTIVE_SUBJECTS_SHOWN = 2;
 
     private TextView txtGreeting;
@@ -62,11 +64,11 @@ public class HomeFragment extends Fragment {
         MaterialButton btnWhyNow = view.findViewById(R.id.btnWhyNow);
         MaterialButton btnUpload = view.findViewById(R.id.btnUpload);
 
-        // ---- 2. Taps (just a message for now; the other screens belong to teammates) ----
+        // ---- 2. Taps: both screens open on top of Home; Back returns here ----
         btnWhyNow.setOnClickListener(v ->
-                Toast.makeText(requireContext(), R.string.toast_why_now, Toast.LENGTH_SHORT).show());
+                ((MainActivity) requireActivity()).openScreen(new WhyNowFragment()));
         btnUpload.setOnClickListener(v ->
-                Toast.makeText(requireContext(), R.string.toast_upload, Toast.LENGTH_SHORT).show());
+                ((MainActivity) requireActivity()).openScreen(new UploadMaterialFragment()));
 
         // QUIZ: practice set of 3 questions in the app; Home refreshes when it closes (onResume)
         view.findViewById(R.id.btnPractice).setOnClickListener(v ->
@@ -89,14 +91,15 @@ public class HomeFragment extends Fragment {
         String[] dayForms = getResources().getStringArray(R.array.plural_days);
 
         int solvedToday = stats.questionsToday();
+        int dailyGoal = new QuizSettings(ctx).getDailyGoal();   // set by the user in Settings
 
         txtGreeting.setText(greetingForHour(LocalTime.now().getHour()));
         txtSolvedToday.setText(getString(R.string.solved_today,
                 RoPlural.format(questionForms, solvedToday)));
 
-        txtGoal.setText(getString(R.string.goal_format, solvedToday, DAILY_GOAL));
-        progressGoal.setMax(DAILY_GOAL);
-        progressGoal.setProgressCompat(Math.min(solvedToday, DAILY_GOAL), true);
+        txtGoal.setText(getString(R.string.goal_format, solvedToday, dailyGoal));
+        progressGoal.setMax(dailyGoal);
+        progressGoal.setProgressCompat(Math.min(solvedToday, dailyGoal), true);
 
         txtStreak.setText(RoPlural.format(dayForms, stats.streakDays()));
         txtAccuracy.setText(getString(R.string.percent_format, stats.accuracyToday()));

@@ -16,8 +16,15 @@ public interface MomentDetector {
     void stop();
 
     /**
-     * The question sent for the last moment was answered (now).
-     * Optional: detectors that space questions "after the answer" (BreakDetector) override it.
+     * The user said "this is a bad moment": drop the rest of the current set and try again
+     * after the normal pause. Detectors without sets ignore it.
+     */
+    default void postponeCycle() {
+    }
+
+    /**
+     * The question sent for the last moment was answered (now). Detectors that space questions
+     * "after the answer" (BreakDetector) start counting the pause from here.
      */
     default void onQuestionAnswered() {
     }

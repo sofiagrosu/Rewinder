@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat;
 import com.example.myapplication1.quiz.trigger.MomentDetector;
 import com.example.myapplication1.quiz.trigger.MomentListener;
 import com.example.myapplication1.quiz.trigger.TriggerConfig;
+import com.example.myapplication1.quiz.trigger.TriggerStatus;
 
 import java.util.ArrayDeque;
 
@@ -30,11 +31,11 @@ import java.util.ArrayDeque;
  * The app starts in "not walking" too, so sitting with the phone also starts a break
  * after STOPPED_FOR_MILLIS without steps.
  *
- * During a break, questions come in sets of QUESTIONS_PER_SET. The spacing is counted from the
- * ANSWER, not from the notification: the next question comes QUESTION_SPACING_MILLIS after the
- * previous one was answered, and the next set PAUSE_BETWEEN_SETS_MILLIS after the last question of
- * the set was answered. While a question waits for an answer, nothing new is sent.
- * Only questions really sent count (a blocked moment is retried after RETRY_AFTER_NOT_SENT_MILLIS).
+ * During a break, questions come in sets of QUESTIONS_PER_SET. Spacing counts from the ANSWER:
+ * the next question comes QUESTION_SPACING_MILLIS after the previous one was answered, the next
+ * set PAUSE_BETWEEN_SETS_MILLIS after the last question of the set was answered (or right after
+ * "bad moment"). While a question waits for an answer nothing new is sent. Only questions really
+ * sent count; a blocked moment is retried after RETRY_AFTER_NOT_SENT_MILLIS.
  * "Walking again" = MIN_STEPS_TO_COUNT_AS_WALKING steps within WALKING_WINDOW_MILLIS;
  * a few single steps (shifting feet at the bus stop) don't end the break.
  * All numbers: see TriggerConfig.
@@ -77,6 +78,7 @@ public class BreakDetector implements MomentDetector, SensorEventListener {
 
         if (!hasActivityPermission(context)) {
             Log.w(TAG, "BreakDetector: ACTIVITY_RECOGNITION permission missing, not started");
+            TriggerStatus.motion = TriggerStatus.Motion.UNKNOWN;
             return;
         }
         sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
@@ -84,6 +86,7 @@ public class BreakDetector implements MomentDetector, SensorEventListener {
         if (stepDetector == null) {
             Log.w(TAG, "BreakDetector: this phone has no step detector sensor, not started");
             sensorManager = null;
+            TriggerStatus.motion = TriggerStatus.Motion.UNKNOWN;
             return;
         }
         sensorManager.registerListener(this, stepDetector, SensorManager.SENSOR_DELAY_NORMAL);
@@ -100,6 +103,7 @@ public class BreakDetector implements MomentDetector, SensorEventListener {
         }
         handler.removeCallbacks(tick);
         resetToNotWalking();
+        TriggerStatus.motion = TriggerStatus.Motion.UNKNOWN;
     }
 
     // ---------------------------------------------------------------- the state machine
@@ -113,21 +117,25 @@ public class BreakDetector implements MomentDetector, SensorEventListener {
                 recentSteps.clear();
                 questionsInSet = 0;
                 nextMomentAt = now;   // first question of the first set: right now
+                TriggerStatus.motion = TriggerStatus.Motion.BREAK;
+                TriggerStatus.breakStartedAt = now;
                 Log.d(TAG, "Break started (" + (cameFromWalking ? "stopped walking" : "not walking") + ")");
             } else {
                 return;
             }
         }
 
-        if (waitingForAnswer) return;          // the next question comes after the answer
+        if (waitingForAnswer) return;          // the next question comes only after the answer
         if (now < nextMomentAt) return;
 
         if (questionsInSet == TriggerConfig.QUESTIONS_PER_SET) {
             questionsInSet = 0;   // the pause is over: a new set starts
         }
+        TriggerStatus.questionsInSet = questionsInSet + 1;   // read by the coordinator while sending
         boolean sent = listener.onMomentDetected(reasonFor(questionsInSet + 1));
         if (!sent) {
-            // blocked (quiet hours, calendar...) or nothing to ask: try again a bit later
+            // blocked (quiet hours, calendar...) or nothing to ask: it does not count, try again later
+            TriggerStatus.questionsInSet = questionsInSet;
             nextMomentAt = now + TriggerConfig.RETRY_AFTER_NOT_SENT_MILLIS;
             return;
         }
@@ -173,14 +181,29 @@ public class BreakDetector implements MomentDetector, SensorEventListener {
             walking = true;
             cameFromWalking = true;
             inBreak = false;
+            TriggerStatus.motion = TriggerStatus.Motion.WALKING;
+            TriggerStatus.breakStartedAt = 0;
             lastStepAt = stepAt;
+            waitingForAnswer = false;   // the question on screen is withdrawn (see onWalkingStarted)
             Log.d(TAG, "Walking detected (" + recentSteps.size() + " steps), break over");
+            listener.onWalkingStarted();   // a question still on screen (also on the watch) is withdrawn
         }
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         // not needed for steps
+    }
+
+    /** "Bad moment" answered Yes: skip the rest of this set, the next one comes after the long pause. */
+    @Override
+    public void postponeCycle() {
+        if (!inBreak) return;
+        questionsInSet = TriggerConfig.QUESTIONS_PER_SET;   // the set counts as finished
+        waitingForAnswer = false;                           // the question was withdrawn
+        nextMomentAt = SystemClock.elapsedRealtime() + TriggerConfig.PAUSE_BETWEEN_SETS_MILLIS;
+        Log.d(TAG, "Bad moment: the rest of the set is skipped, trying again in "
+                + TriggerConfig.PAUSE_BETWEEN_SETS_MILLIS / 60_000 + " min");
     }
 
     // ---------------------------------------------------------------- helpers
@@ -194,6 +217,9 @@ public class BreakDetector implements MomentDetector, SensorEventListener {
         questionsInSet = 0;
         nextMomentAt = 0;
         waitingForAnswer = false;
+        TriggerStatus.questionsInSet = 0;
+        TriggerStatus.motion = TriggerStatus.Motion.STILL_WAITING;
+        TriggerStatus.breakStartedAt = 0;
     }
 
     private String reasonFor(int questionNumber) {
