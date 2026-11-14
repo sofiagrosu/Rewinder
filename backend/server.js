@@ -42,6 +42,17 @@ if (!API_KEY || !APP_TOKEN) {
   process.exit(1);
 }
 
+// Behind a hosting proxy (Render), req.socket.remoteAddress is the proxy's address,
+// the same for every phone. The proxy puts the real client IP first in
+// the X-Forwarded-For header ("client, proxy1, proxy2").
+function clientIp(req) {
+  const forwarded = req.headers["x-forwarded-for"];
+  if (typeof forwarded === "string" && forwarded.length > 0) {
+    return forwarded.split(",")[0].trim();
+  }
+  return req.socket.remoteAddress;
+}
+
 const hits = new Map();
 
 function rateLimited(ip) {
@@ -385,7 +396,7 @@ const server = http.createServer(async (req, res) => {
       return fail(res, 401, "UNAUTHORIZED", "Bad app key");
     }
 
-    if (rateLimited(req.socket.remoteAddress)) {
+    if (rateLimited(clientIp(req))) {
       return fail(
         res,
         429,

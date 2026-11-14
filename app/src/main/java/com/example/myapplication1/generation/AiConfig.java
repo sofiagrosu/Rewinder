@@ -16,8 +16,8 @@ public final class AiConfig {
     private AiConfig() {
     }
 
-    public static final String BACKEND_URL = "http://localhost:3000";
-    public static final String APP_TOKEN = "change-me-same-as-the-server";
+    public static final String BACKEND_URL = "https://rewinder-l2y1.onrender.com";
+    public static final String APP_TOKEN = "rw-2589-zwkjl-2619pmg";
 
     public static final int MAX_PDF_BYTES = 10 * 1024 * 1024;
     public static final int[] COUNT_CHOICES = {5, 10, 15};
